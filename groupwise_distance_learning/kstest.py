@@ -2,6 +2,7 @@
 Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/02/29
 """
+from numpy import array
 from rpy2.robjects.packages import importr
 from rpy2.robjects.numpy2ri import numpy2ri
 
@@ -27,7 +28,7 @@ def kstest_2samp_greater(x, y):
     * ts: <numeric> test statistics of KS-test
     * pvalue: <numeric> p-value fo test statistics
     """
-    setting = np.array(["less"], dtype="str")
+    setting = array(["less"], dtype="str")
     test_res = rstats.ks_test(x, y, alternative=setting)
     ts, pval = test_res[0][0], test_res[1][0]
     return ts, pval
