@@ -19,7 +19,6 @@ from networkx import Graph
 
 from learning_dist_metrics.ldm import LDM
 from learning_dist_metrics.dist_metrics import weighted_euclidean
-
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 
 
@@ -349,9 +348,11 @@ def get_fit_score(fit_pvals, buffer_group, c):
     # weighted sum of pvalues
     wsum_pval = 0
     num_users = 0
+
     for g, v in fit_pvals.iteritems():
         wsum_pval += sum(np.array(v) * 1.0) * (len(v) * len(v))
         num_users += len(v)
+
     wsum_pval = wsum_pval * 1.0 / num_users
 
     penalty = c * len(buffer_group)
