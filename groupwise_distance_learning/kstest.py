@@ -3,6 +3,7 @@ Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/02/29
 """
 from numpy import array
+from rpy2 import robjects
 from rpy2.robjects.packages import importr
 from rpy2.robjects.numpy2ri import numpy2ri
 

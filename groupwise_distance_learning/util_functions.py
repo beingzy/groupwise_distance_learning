@@ -22,25 +22,6 @@ from learning_dist_metrics.dist_metrics import weighted_euclidean
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 
 
-def init_embed_list(n):
-    """
-    """
-    ls = []
-    for i in range(n):
-        ls.append([])
-    return ls
-
-
-def init_dict_list(k):
-    """ create dictionary with k items, each
-        item is a empty list
-    """
-    res_dict = {}
-    for i in range(k):
-        res_dict[i] = []
-    return res_dict
-
-
 def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
     """ return vector of weighted distance of a user vs. user's conencted users,
     and a vector of weighted distnces of a user vs. user's non-connected users.
