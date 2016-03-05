@@ -47,22 +47,130 @@ def _validate_user_information(user_ids, user_profiles, user_connections):
         raise ValueError("strange users are found in user_connections!")
 
 
-def _update_fit_groups_with_groupwise_dist():
-    """update members in fit_group with distance metrics unfit member will be
-    sent to unfit group
+def _update_groupwise_dist(dist_metrics, fit_group, user_profiles, user_connections,
+                           min_group_size=5, random_state=None):
+    """ learning gruopwise distnace metrics
     """
-    pass
+    # step 00: learn distance metriccs
+    for gg, gg_user_ids in fit_group.items():
+        # ldm() optimized distance metrics - weights
+        # for selected users
+        if len(gg_user_ids) > min_group_size:
+            dist_weights = ldm_train_with_list(gg_user_ids, user_profiles, user_connections)
+            dist_metrics[gg] = dist_weights
+        else:
+            if not gg in dist_metrics:
+                # intialize default distance metrics weights
+                dist_metrics[gg] = [1] * user_profiles.shape[1]
+    return dist_metrics
 
-def _update_buffergroup():
+
+def _update_fit_group_with_groupwise_dist(dist_matrics, fit_group, fit_pvals,
+                                           user_profiles, user_graph,
+                                           ks_alpha=0.05):
+    """update members in fit_group with distance metrics unfit member will be
+    sent to unfit group.
+    (dist_matrics, fit_group, fit_pvals, unfit_group)
+
+    Parameters:
+    ----------
+    dist_metrics: dictionary
+
+    fit_group: dictionary
+
+    fit_pvals: dictionary
+
+    user_profiles: matrix-like (numpy.array)
+
+    user_graph:
+
+    ks_alpha: float, default value = 0.05
+
+    Returns:
+    -------
+    fit_group, fit_pvals, unfit_group
+    """
+    fit_group_copy = fit_group.copy()
+    unfit_group = {}
+
+    for gg, gg_user_ids in fit_group_copy.items():
+        gg_dist = dist_matrics[gg]
+
+        for ii, ii_user_id in enumerate(gg_user_ids):
+            sim_dist, diff_dist = user_grouped_dist(ii_user_id, gg_dist, user_profiles, user_graph)
+            ii_pval = user_dist_kstest(sim_dist, diff_dist)
+
+            if ii_pval < ks_alpha:
+                # remove the user from fit group
+                idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id]
+                del fit_group[gg][idx]
+                del fit_pvals[gg][idx]
+                # add the user into unfit group
+                if gg in unfit_group:
+                    unfit_group[gg].append(ii_user_id)
+                else:
+                    unfit_group[gg] = [ii_user_id]
+            else:
+                # update pvalue for user
+                idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id]
+                fit_pvals[gg][idx] = ii_pval
+
+    return fit_group, fit_pvals, unfit_group
+
+
+def _update_buffergroup(dist_metrics, fit_group, fit_pvals, buffer_group,
+                        user_profiles, user_graph,
+                        ks_alpha=0.05):
     """redistribute member in buffer group into fit_group if fit had been found
     """
-    pass
+    # step 02: test members in buffer group with all updated distance metrics
+    # fit with other distance metrics
+    buffer_group_copy = buffer_group.copy()
+    if len(buffer_group_copy) > 0:
+        for ii, ii_user_id in enumerate(buffer_group_copy):
+            ii_new_group, ii_new_pval = find_fit_group(ii_user_id, dist_metrics,
+                                                       user_profiles, user_graph, ks_alpha,
+                                                       current_group=None, fit_rayleigh=False)
+            if not ii_new_group is None:
+                # remove member with fit from buffer_group
+                buffer_group.remove(ii_user_id)
+                if ii_new_group in fit_group:
+                    fit_group[ii_new_group].append(ii_user_id)
+                    fit_pvals[ii_new_group].append(ii_new_pval)
+                else:
+                    fit_group[ii_new_group] = [ii_user_id]
+                    fit_pvals[ii_new_group] = [ii_new_pval]
 
-def _update_unfit_groups_with_crossgroup_dist():
-    """update members in unfit_group with cross-group distance. unfit members
+    return fit_group, fit_pvals, buffer_group
+
+
+def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals, unfit_group, buffer_group,
+                                              user_profiles, user_graph, ks_alpha=0.05):
+    """u pdate members in unfit_group with cross-group distance. unfit members
     are kept in buffer_group
     """
-    pass
+    unfit_group_copy = unfit_group.copy()
+    for gg, gg_user_ids in unfit_group_copy.items():
+        # extract cross-group distance metrics dictionary to avoid duplicate
+        # test with distance metrics associated with user's group
+        other_group_keys = [group_key for group_key in dist_metrics.keys() if not group_key == gg]
+        cross_group_dist_metrics = {key: dist_metrics[key] for key in other_group_keys}
+        for ii, ii_user_id in enumerate(gg_user_ids):
+            ii_new_group, ii_new_pval = find_fit_group(ii_user_id, cross_group_dist_metrics,
+                                                       user_profiles, user_graph, ks_alpha,
+                                                       current_group=None, fit_rayleigh=False)
+            # redistribute the user based on fit-test
+            if not ii_new_group is None:
+                # remove member with fit from buffer_group
+                if ii_new_group in fit_group:
+                    fit_group[ii_new_group].append(ii_user_id)
+                    fit_pvals[ii_new_group].append(ii_new_pval)
+                else:
+                    fit_group[ii_new_group] = [ii_user_id]
+                    fit_pvals[ii_new_group] = [ii_new_pval]
+            else:
+                buffer_group.append(ii_user_id)
+    return fit_group, fit_pvals, buffer_group
 
 
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
@@ -102,7 +210,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
 
 def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
-                                    dist_matrics, fit_group, fit_pvals, unfit_group,
+                                    dist_metrics, fit_group, fit_pvals, unfit_group,
                                     buffer_group, ks_alpha=0.05,
                                     min_group_size=5, verbose=False, random_state=None):
     """ a single run of groupwise distance learning
@@ -149,94 +257,52 @@ def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
     Returns;
     -------
     """
-    start_time = datetime.now()
+    total_time = 0
 
     # develop a function to ensure user-ids and user_profile match
 
     n_user, n_feat = user_profiles.shape
 
+    start_time = datetime.now()
     # step 00: learn distance metriccs
-    for gg, gg_user_ids in fit_group.items():
-        # ldm() optimized distance metrics - weights
-        # for selected users
-        if len(gg_user_ids) > min_group_size:
-            dist_weights = ldm_train_with_list(gg_user_ids, user_profiles, user_connections)
-            dist_matrics[gg] = dist_weights
-        else:
-            if not gg in dist_matrics:
-                # intialize default distance metrics weights
-                dist_matrics[gg] = [1] * user_profiles.shape[1]
+    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_profiles, user_connections,
+                                          min_group_size)
+    if verbose:
+        duration = (datetime.now() - start_time).total_seconds()
+        total_time += duration
+        print( "updating groupwise distance took about %.2f seconds\n" % duration )
 
     # step 01: update the member composition in response to
     # newly learned distance metrics weights
-    fit_group_copy = fit_group.copy()
-
-    for gg, gg_user_ids in fit_group_copy.items():
-        gg_dist = dist_matrics[gg]
-
-        for ii, ii_user_id in enumerate(gg_user_ids):
-            sim_dist, diff_dist = user_grouped_dist(ii_user_id, gg_dist, user_profiles, user_graph)
-            ii_pval = user_dist_kstest(sim_dist, diff_dist)
-
-            if ii_pval < ks_alpha:
-                # remove the user from fit group
-                idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id]
-                del fit_group[gg][idx]
-                del fit_pvals[gg][idx]
-                # add the user into unfit group
-                if gg in unfit_group:
-                    unfit_group[gg].append(ii_user_id)
-                else:
-                    unfit_group[gg] = [ii_user_id]
-            else:
-                # update pvalue for user
-                idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id]
-                fit_pvals[gg][idx] = ii_pval
+    start_time = datetime.now()
+    fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
+                                                                               user_profiles, user_graph, ks_alpha)
+    if verbose:
+        duration = (datetime.now() - start_time).total_seconds()
+        total_time += duration
+        print( "updating fit group with updated groupwise distance took about %.2f seconds\n" % duration )
 
     # step 02: test members in buffer group with all updated distance metrics
     # fit with other distance metrics
-    buffer_group_copy = buffer_group.copy()
-    if len(buffer_group_copy) > 0:
-        for ii, ii_user_id in enumerate(buffer_group_copy):
-            ii_new_group, ii_new_pval = find_fit_group(ii_user_id, dist_matrics,
-                                                       user_profiles, user_graph, ks_alpha,
-                                                       current_group=None, fit_rayleigh=False)
-            if not ii_new_group is None:
-                # remove member with fit from buffer_group
-                buffer_group.remove(ii_user_id)
-                if ii_new_group in fit_group:
-                    fit_group[ii_new_group].append(ii_user_id)
-                    fit_pvals[ii_new_group].append(ii_new_pval)
-                else:
-                    fit_group[ii_new_group] = [ii_user_id]
-                    fit_pvals[ii_new_group] = [ii_new_pval]
+    start_time = datetime.now()
+    fit_group, fit_pvals, buffer_group = _update_buffergroup(dist_metrics, fit_group, fit_pvals, buffer_group,
+                                                             user_profiles, user_graph, ks_alpha)
+    if verbose:
+        duration = (datetime.now() - start_time).total_seconds()
+        total_time += duration
+        print( "updating buffer_group with updated groupwise distance took about %.2f seconds\n" % duration )
 
     # step 03: test members in unfit_group with cross-group distance metrics
-    unfit_group_copy = unfit_group.copy()
-    for gg, gg_user_ids in unfit_group_copy.items():
-        # extract cross-group distance metrics dictionary to avoid duplicate
-        # test with distance metrics associated with user's group
-        other_group_keys = [group_key for group_key in dist_matrics.keys() if not group_key == gg]
-        cross_group_dist_metrics = {key: dist_matrics[key] for key in other_group_keys}
-        for ii, ii_user_id in enumerate(gg_user_ids):
-            ii_new_group, ii_new_pval = find_fit_group(ii_user_id, cross_group_dist_metrics,
-                                                       user_profiles, user_graph, ks_alpha,
-                                                       current_group=None, fit_rayleigh=False)
-            # redistribute the user based on fit-test
-            if not ii_new_group is None:
-                # remove member with fit from buffer_group
-                if ii_new_group in fit_group:
-                    fit_group[ii_new_group].append(ii_user_id)
-                    fit_pvals[ii_new_group].append(ii_new_pval)
-                else:
-                    fit_group[ii_new_group] = [ii_user_id]
-                    fit_pvals[ii_new_group] = [ii_new_pval]
-            else:
-                buffer_group.append(ii_user_id)
-    # clean up unfit_group
-    unfit_group = {}
+    start_time = datetime.now()
+    fit_group, fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals,
+                                                                                   unfit_group, buffer_group,
+                                                                                   user_profiles, user_graph, ks_alpha)
+    if verbose:
+        duration = (datetime.now() - start_time).total_seconds()
+        total_time += duration
+        print( "updating unfit_group with updated cross-group distance took about %.2f seconds\n" % duration )
 
-    return (dist_matrics, fit_group, fit_pvals, buffer_group)
+    return (dist_metrics, fit_group, fit_pvals, buffer_group)
 
 
 
