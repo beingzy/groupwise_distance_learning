@@ -96,7 +96,7 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
 
     Returns:
     -------
-    * res: {float}: p-value of ks-test with assumption that distances follow
+    * res: {float}: p-value of ks-tests with assumption that distances follow
             Rayleigh distribution.
 
     Examples:
@@ -118,7 +118,7 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
         samp_friend = rayleigh.rvs(friend_param[0], friend_param[1], _n)
         samp_nonfriend = rayleigh.rvs(nonfriend_param[0], nonfriend_param[1], _n)
 
-        # ouput p-value of ks-test
+        # ouput p-value of ks-tests
         res = kstest_2samp_greater(samp_friend, samp_nonfriend)[1]
     else:
         res = kstest_2samp_greater(sim_dist_vec, diff_dist_vec)[1]
@@ -133,7 +133,7 @@ def users_filter_by_weights(weights, profile_df, friends_networkx,
                             fit_rayleigh=False,
                             _n=1000):
     """ Split users into two groups, "keep" and "mutate", with respect to
-        p-value of the ks-test on the null hypothesis that the distribution of
+        p-value of the ks-tests on the null hypothesis that the distribution of
         friends' weighted distance is not significantly different from the
         couterpart for non-friends. Assume the weighted distances of each group
         follow Rayleigh distribution.
@@ -254,7 +254,7 @@ def find_fit_group(uid, dist_metrics, profile_df,
     dist_metrics: {dictionary}, all {index: distance_metrics}
     profile_df: {DataFrame}, user profile includes "ID" column
     friend_networkx: {networkx.Graph}, user relationships
-    threshold: {float}, threshold for qualifying pvalue of ks-test
+    threshold: {float}, threshold for qualifying pvalue of ks-tests
     current_group: {integer}, group index
     fit_rayleigh: {boolean}
 
@@ -275,7 +275,7 @@ def find_fit_group(uid, dist_metrics, profile_df,
 
         for d in other_dist_metrics:
             # loop through all distance metrics and calculate
-            # p-value of ks-test by applying it to the user
+            # p-value of ks-tests by applying it to the user
             # relationships
             sdist, ddist = user_grouped_dist(user_id=uid, weights=d,
                         profile_df=profile_df, friend_networkx=friend_networkx)

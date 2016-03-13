@@ -1,0 +1,41 @@
+""" functions for developing
+
+Author: Yi Zhang <beingzy@gmail.com>
+Date: 2016/03/10
+"""
+import os
+import os.path
+from os.path import dirname, abspath, join
+import pandas as pd
+
+
+def get_file_parent_dir_path(level=1):
+    """ return the path of the parent directory of current file """
+    current_dir_path = dirname(abspath(__file__))
+    path_sep = os.path.sep
+    components = current_dir_path.split(path_sep)
+    return path_sep.join(components[:-level])
+
+
+def load_sample_test_data():
+    """ load small test data """
+    _root_dir = get_file_parent_dir_path(level=2)
+    _data_dir = join(_root_dir, 'data', 'small_test')
+
+    user_profile_fpath = join(_data_dir, "user_profile.csv")
+    user_connections_fpath = join(_data_dir, "connections.csv")
+
+    int_user_profile_df = pd.read_csv(user_profile_fpath, header=0, sep=',')
+    user_connections_df = pd.read_csv(user_connections_fpath, header=0, sep=',')
+
+    user_ids = int_user_profile_df.id.tolist()
+    # remove id columns and cetegorical feature column
+    user_profile_df = int_user_profile_df.drop(["id", "feat_3"], axis=1, inplace=False).as_matrix()
+    user_connections_df = user_connections_df.as_matrix()
+
+    return user_ids, user_profile_df, user_connections_df
+
+
+
+
+

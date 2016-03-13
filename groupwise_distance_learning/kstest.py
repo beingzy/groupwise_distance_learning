@@ -12,7 +12,7 @@ robjects.conversion.py2ri = numpy2ri
 rstats = importr("stats")
 
 def kstest_2samp_greater(x, y):
-    """ return test staticics and p-value for KS-test
+    """ return tests staticics and p-value for KS-tests
     which compare two samples.
 
     Hypothesis:
@@ -26,8 +26,8 @@ def kstest_2samp_greater(x, y):
 
     Returns:
     -------
-    * ts: <numeric> test statistics of KS-test
-    * pvalue: <numeric> p-value fo test statistics
+    * ts: <numeric> tests statistics of KS-tests
+    * pvalue: <numeric> p-value fo tests statistics
     """
     setting = array(["less"], dtype="str")
     test_res = rstats.ks_test(x, y, alternative=setting)
