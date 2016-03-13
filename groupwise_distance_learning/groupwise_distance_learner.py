@@ -168,19 +168,27 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
 
 
 def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals, unfit_group, buffer_group,
-                                              user_profiles, user_graph, ks_alpha=0.05):
-    """u pdate members in unfit_group with cross-group distance. unfit members
-    are kept in buffer_group
+                                              user_ids, user_profiles, user_connections, ks_alpha=0.05):
+    """ update members in unfit_group with cross-group distance. unfit members are kept in buffer_group
     """
+    # to keep API consistant
+    # restore user_profiles to DataFrame including
+    user_profile_df = DataFrame(user_profiles)
+    user_profile_df["ID"] = user_ids
+
+    user_graph = Graph()
+    user_graph.add_edges_from(user_connections)
+
     unfit_group_copy = unfit_group.copy()
     for gg, gg_user_ids in unfit_group_copy.items():
         # extract cross-group distance metrics dictionary to avoid duplicate
         # tests with distance metrics associated with user's group
         other_group_keys = [group_key for group_key in dist_metrics.keys() if not group_key == gg]
         cross_group_dist_metrics = {key: dist_metrics[key] for key in other_group_keys}
+
         for ii, ii_user_id in enumerate(gg_user_ids):
             ii_new_group, ii_new_pval = find_fit_group(ii_user_id, cross_group_dist_metrics,
-                                                       user_profiles, user_graph, ks_alpha,
+                                                       user_profile_df, user_graph, ks_alpha,
                                                        current_group=None, fit_rayleigh=False)
             # redistribute the user based on fit-tests
             if not ii_new_group is None:
@@ -193,6 +201,7 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
                     fit_pvals[ii_new_group] = [ii_new_pval]
             else:
                 buffer_group.append(ii_user_id)
+
     return fit_group, fit_pvals, buffer_group
 
 

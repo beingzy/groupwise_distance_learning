@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11f45405-4fa3-42cd-8ee1-e01f5a296f52" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py" />
     </list>
     <ignored path="groupwise_distance_learning.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,11 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="util_functions.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="util_functions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/util_functions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.129771">
-              <caret line="278" column="27" selection-start-line="278" selection-start-column="27" selection-end-line="278" selection-end-column="27" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="303" column="0" selection-start-line="303" selection-start-column="0" selection-end-line="303" selection-end-column="0" />
               <folding>
                 <element signature="e#109#118#0" expanded="true" />
               </folding>
@@ -39,31 +41,11 @@
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="153" column="40" selection-start-line="153" selection-start-column="40" selection-end-line="153" selection-end-column="54" />
+              <caret line="180" column="0" selection-start-line="180" selection-start-column="0" selection-end-line="180" selection-end-column="0" />
               <folding>
                 <element signature="e#0#89#1" expanded="false" />
                 <element signature="e#90#119#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="connections.csv" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/small_test/connections.csv">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="5" column="3" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="user_profile.csv" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/small_test/user_profile.csv">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="30" selection-start-line="0" selection-start-column="30" selection-end-line="0" selection-end-column="30" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -80,11 +62,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test_individual_function_suites.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="test_individual_function_suites.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="156" column="55" selection-start-line="156" selection-start-column="8" selection-end-line="156" selection-end-column="55" />
+            <state vertical-scroll-proportion="0.6366412">
+              <caret line="336" column="0" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
               <folding>
                 <element signature="e#109#124#0" expanded="true" />
               </folding>
@@ -119,9 +101,9 @@
         <option value="$PROJECT_DIR$/groupwise_distance_learning/tests/test_helper_func.py" />
         <option value="$PROJECT_DIR$/data/small_test/user_profile.csv" />
         <option value="$PROJECT_DIR$/data/small_test/connections.csv" />
-        <option value="$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py" />
-        <option value="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" />
         <option value="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" />
+        <option value="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" />
+        <option value="$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py" />
       </list>
     </option>
   </component>
@@ -938,19 +920,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/small_test/connections.csv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="3" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/small_test/user_profile.csv">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="30" selection-start-line="0" selection-start-column="30" selection-end-line="0" selection-end-column="30" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/small_test/connections.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.129771">
+          <caret line="5" column="3" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/util_functions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="303" column="0" selection-start-line="303" selection-start-column="0" selection-end-line="303" selection-end-column="0" />
+          <folding>
+            <element signature="e#109#118#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -967,7 +959,7 @@
     <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="153" column="40" selection-start-line="153" selection-start-column="40" selection-end-line="153" selection-end-column="54" />
+          <caret line="180" column="0" selection-start-line="180" selection-start-column="0" selection-end-line="180" selection-end-column="0" />
           <folding>
             <element signature="e#0#89#1" expanded="false" />
             <element signature="e#90#119#0" expanded="true" />
@@ -977,20 +969,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="156" column="55" selection-start-line="156" selection-start-column="8" selection-end-line="156" selection-end-column="55" />
+        <state vertical-scroll-proportion="0.6366412">
+          <caret line="336" column="0" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
           <folding>
             <element signature="e#109#124#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/util_functions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.129771">
-          <caret line="278" column="27" selection-start-line="278" selection-start-column="27" selection-end-line="278" selection-end-column="27" />
-          <folding>
-            <element signature="e#109#118#0" expanded="true" />
           </folding>
         </state>
       </provider>
