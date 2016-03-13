@@ -244,7 +244,7 @@ def ldm_train_with_list(users_list, profile_df, friends, retain_type=1):
 
 def find_fit_group(uid, dist_metrics, profile_df,
                    friend_networkx, threshold=0.5,
-                   current_group=None, fit_rayleigh=False):
+                   current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
         each group
 
@@ -263,29 +263,33 @@ def find_fit_group(uid, dist_metrics, profile_df,
     res: {list}, [group_idx, pvalue]
     """
     if current_group is None:
-        other_group = dist_metrics.keys()
-        other_dist_metrics = dist_metrics.values()
+        other_group = list(dist_metrics.keys())
+        other_dist_metrics = list(dist_metrics.values())
     else:
-        other_group = [i for i in dist_metrics.keys() if i != current_group]
-        other_dist_metrics = [d for g, d in dist_metrics.iteritems() if g != current_group]
+        other_group = [group for group in dist_metrics.keys() if group != current_group]
+        other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
 
     if len(other_dist_metrics) > 0:
         # only excute this is at least one alternative group
         pvals = []
 
-        for d in other_dist_metrics:
+        for dist in other_dist_metrics:
             # loop through all distance metrics and calculate
             # p-value of ks-tests by applying it to the user
             # relationships
-            sdist, ddist = user_grouped_dist(user_id=uid, weights=d,
-                        profile_df=profile_df, friend_networkx=friend_networkx)
+            sdist, ddist = user_grouped_dist(user_id=uid, weights=dist, profile_df=profile_df,
+                                             friend_networkx=friend_networkx)
+
             pval = user_dist_kstest(sim_dist_vec=sdist, diff_dist_vec=ddist,
-                                fit_rayleigh=fit_rayleigh, _n=1000)
+                                    fit_rayleigh=fit_rayleigh, _n=_n)
+
             pvals.append(pval)
 
+        # find group whose distance metrics explained a user's existing
+        # connections at the best degree.
         max_pval = max(pvals)
-        max_index = [i for i, p in enumerate(pvals) if p == max_pval][0]
-        best_group = other_group[max_index]
+        max_idx = [ii for ii, pval in enumerate(pvals) if pval == max_pval][0]
+        best_group = other_group[max_idx]
 
         if max_pval < threshold:
             # reject null hypothesis
