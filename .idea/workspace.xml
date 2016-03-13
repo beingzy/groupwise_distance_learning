@@ -2,17 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11f45405-4fa3-42cd-8ee1-e01f5a296f52" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/a605739.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_helper_func.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_individual_function_suites.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/groupwise_distance_learning/test/__init__.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/__init__.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/groupwise_distance_learning/test/test_kstest.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_kstest.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/kstest.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/kstest.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" />
     </list>
     <ignored path="groupwise_distance_learning.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -465,7 +455,13 @@
       <option name="project" value="LOCAL" />
       <updated>1457149850064</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="complete unittest for some internal functions">
+      <created>1457835771174</created>
+      <option name="number" value="00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1457835771174</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TodoView">
@@ -483,6 +479,7 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19651347" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298969" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3293348" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298969" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -491,7 +488,6 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -520,7 +516,8 @@
     <MESSAGE value="update kstest unittest file" />
     <MESSAGE value="implement single_run function" />
     <MESSAGE value="update single_run_function with steps being packaged into a set of separate functions" />
-    <option name="LAST_COMMIT_MESSAGE" value="update single_run_function with steps being packaged into a set of separate functions" />
+    <MESSAGE value="complete unittest for some internal functions" />
+    <option name="LAST_COMMIT_MESSAGE" value="complete unittest for some internal functions" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -552,6 +549,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -608,6 +608,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -664,6 +667,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -720,6 +726,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -776,6 +785,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -920,6 +932,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34615386">
           <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#85#100#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
