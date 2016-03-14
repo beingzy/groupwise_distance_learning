@@ -205,47 +205,10 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
     return fit_group, fit_pvals, buffer_group
 
 
-def groupwise_dist_learning(user_ids, user_profiles, user_connections,
-                            n_group, max_iter, tol,
-                            verbose=False, random_state=None):
-    """ groupwise distance learning algorithm to classify users
-
-    Parameters:
-    ----------
-    user_ids: list of all user_id
-
-    user_profile: matrix-like of user profiles, records should align with user_ids
-
-    user_graph: networkx.Graph instance stores user_connections information
-
-    n_group: integer, the number of groups to learn
-
-    max_iter: integer, the maximum number of iteration for learning
-
-    tol: float, tolerance for incremental gain in fit score
-
-    verbose: boolean, optional, default value = False
-       verbosity mode
-
-    random_state: integer or numpy.RandomState, optional
-       the generator used to initialize the group composition. If an integer
-       is given it fixes the seed. Defaults to the global numpy random number
-       generator
-
-    Returns;
-    -------
-    """
-
-    _validate_user_information(user_ids, user_profiles, user_connections)
-
-    # initiate containers
-    pass
-
-
-def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
-                                    dist_metrics, fit_group, fit_pvals, unfit_group,
-                                    buffer_group, ks_alpha=0.05,
-                                    min_group_size=5, verbose=False, random_state=None):
+def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
+                                        user_ids, user_profiles, user_connections,
+                                        ks_alpha=0.05, min_group_size=5, verbose=False,
+                                        random_state=None):
     """ a single run of groupwise distance learning
 
     Parameters:
@@ -298,7 +261,7 @@ def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
 
     start_time = datetime.now()
     # step 00: learn distance metriccs
-    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_profiles, user_connections,
+    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
                                           min_group_size)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -309,7 +272,8 @@ def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
     # newly learned distance metrics weights
     start_time = datetime.now()
     fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
-                                                                               user_profiles, user_graph, ks_alpha)
+                                                                              user_ids, user_profiles, user_connections,
+                                                                              ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -319,7 +283,7 @@ def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
     # fit with other distance metrics
     start_time = datetime.now()
     fit_group, fit_pvals, buffer_group = _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
-                                                              user_profiles, user_graph, ks_alpha)
+                                                              user_ids, user_profiles, user_connections, ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -329,13 +293,51 @@ def _groupwise_dist_learning_single(user_profiles, user_connections, user_graph,
     start_time = datetime.now()
     fit_group, fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals,
                                                                                    unfit_group, buffer_group,
-                                                                                   user_profiles, user_graph, ks_alpha)
+                                                                                   user_ids, user_profiles,
+                                                                                   user_connections, ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
         print( "updating unfit_group with updated cross-group distance took about %.2f seconds\n" % duration )
 
-    return (dist_metrics, fit_group, fit_pvals, buffer_group)
+    return dist_metrics, fit_group, fit_pvals, buffer_group
+
+
+def groupwise_dist_learning(user_ids, user_profiles, user_connections,
+                            n_group, max_iter, tol,
+                            verbose=False, random_state=None):
+    """ groupwise distance learning algorithm to classify users
+
+    Parameters:
+    ----------
+    user_ids: list of all user_id
+
+    user_profile: matrix-like of user profiles, records should align with user_ids
+
+    user_graph: networkx.Graph instance stores user_connections information
+
+    n_group: integer, the number of groups to learn
+
+    max_iter: integer, the maximum number of iteration for learning
+
+    tol: float, tolerance for incremental gain in fit score
+
+    verbose: boolean, optional, default value = False
+       verbosity mode
+
+    random_state: integer or numpy.RandomState, optional
+       the generator used to initialize the group composition. If an integer
+       is given it fixes the seed. Defaults to the global numpy random number
+       generator
+
+    Returns;
+    -------
+    """
+
+    _validate_user_information(user_ids, user_profiles, user_connections)
+
+    # initiate containers
+    pass
 
 
 
