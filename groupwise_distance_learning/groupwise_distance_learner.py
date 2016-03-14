@@ -3,8 +3,12 @@ Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/MM/DD
 """
 from datetime import datetime
+from numpy.random import choice
 from pandas import DataFrame
 from networkx import Graph
+from math import floor
+from datetime import datetime
+
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 from groupwise_distance_learning.util_functions import user_grouped_dist
 from groupwise_distance_learning.util_functions import user_dist_kstest
@@ -205,6 +209,45 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
     return fit_group, fit_pvals, buffer_group
 
 
+def _fit_score(pvals, buffer_group, C=1):
+    """
+    sum(pvals) / #gouped_user - C * #buffer_group/#total_user
+    """
+    sum_pvals = 0
+    num_grouped_users = 0
+    total_users = 0
+
+    for group in pvals.keys():
+        sum_pvals += sum(pvals[group])
+        num_grouped_users += len(pvals[group])
+
+    num_buffer_users = len(buffer_group)
+    total_users = num_grouped_users + num_buffer_users
+
+    score = sum_pvals / num_grouped_users - C * num_buffer_users / total_users
+
+    return round(score, 4)
+
+
+def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
+    """ validate input data
+    """
+    if not len(dist_metrics) == len(fit_group) == len(fit_pvals):
+        msg = "input pacakge (dist_metrics, fit_group, fit_pvals) are not compatiable! "
+        raise ValueError(msg)
+
+    fit_group_keys = list(fit_group.keys())
+    fit_pvals_keys = list(fit_pvals.keys())
+
+    for ii, key_pairs in enumerate(zip(fit_group_keys, fit_pvals_keys)):
+        gkey, pkey = key_pairs
+        n_item_fit_group = len(fit_group[gkey])
+        n_item_fit_pvals = len(fit_pvals[pkey])
+        if n_item_fit_group != n_item_fit_pvals:
+            msg = "fit_group's {} group and fit_pvals {} group has different length of items".format(gkey, pkey)
+            raise ValueError(msg)
+
+
 def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
                                         user_ids, user_profiles, user_connections,
                                         ks_alpha=0.05, min_group_size=5, verbose=False,
@@ -255,9 +298,8 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     """
     total_time = 0
 
-    # develop a function to ensure user-ids and user_profile match
-
-    n_user, n_feat = user_profiles.shape
+    # validate the input data is compatible
+    _validate_input_learned_info(dist_metrics, fit_group, fit_pvals)
 
     start_time = datetime.now()
     # step 00: learn distance metriccs
@@ -304,8 +346,10 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 
 
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
-                            n_group, max_iter, tol,
-                            verbose=False, random_state=None):
+                            n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
+                            min_group_size=5, ks_alpha=0.05,
+                            sample_method="even",
+                            verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users
 
     Parameters:
@@ -322,6 +366,13 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
     tol: float, tolerance for incremental gain in fit score
 
+    min_group_size: integer, the minimum number of members for a group
+
+    ks_alpha: alpha value for ks-test
+        H0: distr.(conencted users) >= distr.(disconnected users)
+
+    sample_method: character, {'even', 'zipf')
+
     verbose: boolean, optional, default value = False
        verbosity mode
 
@@ -337,8 +388,91 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     _validate_user_information(user_ids, user_profiles, user_connections)
 
     # initiate containers
-    pass
+    dist_metrics = _init_dict_list(n_group)
+    fit_group = _init_dict_list(n_group)
+    fit_pvals = _init_dict_list(n_group)
+    buffer_group = []
 
+    # initiating the group's composition
+    sample_size = floor( len(user_ids) / n_group )
+    group_sizes = [sample_size] * n_group
+    # margin
+    margin = len(user_ids) - (sample_size * n_group)
+    if margin > 0:
+        group_sizes[0] += margin
+
+    # initiate fit_group, fit_pvals
+    # by distributing users to different groups
+    user_ids_copy = user_ids.copy()
+    group_names = list(dist_metrics.keys())
+    # assign users to each groups
+    for gname, gsize in zip(group_names, group_sizes):
+
+        # assign users to group
+        draws = choice(user_ids_copy, gsize, replace=False)
+        fit_group[gname] = draws
+        # create inititial group-associated p-values
+        fit_pvals[gname] = [1] * gsize
+
+        for drawed_user_id in draws:
+            user_ids_copy.remove(drawed_user_id)
+
+    if is_debug:
+        fs_hist = []
+        knowledge_pkgs = []
+        timers = []
+
+    # =================
+    # learning process
+    # =================
+    _nogain_streak = 0
+    _iterate_counter = 0
+    _max_fit_score = 0
+
+    best_knowledge_pack = None
+
+    while _nogain_streak < max_nogain_streak:
+
+        if _iterate_counter > max_iter:
+            break
+
+        loop_start_time = datetime.now()
+        iter_res = _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
+                                                       user_ids, user_profiles, user_connections,
+                                                       ks_alpha, min_group_size, verbose,
+                                                       random_state)
+        loop_duration = (datetime.now() - loop_start_time).total_seconds()
+        dist_metrics, fit_group, fit_pvals, buffer_group = iter_res
+        knowledge_pack = (dist_metrics, fit_group, buffer_group)
+
+        # evaluate current knowledge pack
+        fit_score = _fit_score(fit_pvals, buffer_group)
+
+
+        if verbose:
+            msg = "- {}th iteration's fit score: {:.2f}\n".format(_iterate_counter, fit_score)
+            msg += "- time cost: {:.0f} seconds".format(loop_duration)
+            print(msg)
+
+        # capture the best learned knowledge
+        if fit_score > _max_fit_score:
+            # find a better solution
+            _max_fit_score = fit_score
+            best_knowledge_pack = knowledge_pack
+            # reset non effective learning
+            _nogain_streak = 0
+        else:
+            # marginal learning
+            _nogain_streak += 1
+
+        if is_debug:
+            timers.append(loop_duration)
+            fs_hist.append(fit_score)
+            knowledge_pkgs.append(knowledge_pack)
+
+        _iterate_counter += 1
+
+    return best_knowledge_pack
 
 
 class GroupwiseDistLearner(object):

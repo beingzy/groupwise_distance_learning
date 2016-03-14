@@ -109,6 +109,29 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         print("new 2nd fit_pval: {}".format(new_fit_pvals[1]))
         print("buffer_group: {}".format(new_buffer_group))
 
+    def test_single_run_05(self):
+        user_ids, user_profiles, user_connections = load_sample_test_data()
+
+        # definte test data
+        fit_group = {0: [], 1: ['a', 'd', 'e']}
+        fit_pvals = {0: [], 1: [1, 1]}
+        dist_metrics = {0: [1, 1, 1], 1: [1, 1, 1]}
+        buffer_group = []
+
+        try:
+            single_run_res = _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
+                                                                 user_ids, user_profiles, user_connections,
+                                                                 ks_alpha=0.05, min_group_size=1, verbose=True)
+            # test internal mehtod regardin validating input data
+            # it should capture the illegal input
+            is_ok = False
+        except:
+            is_ok = True
+        self.assertTrue(is_ok)
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
