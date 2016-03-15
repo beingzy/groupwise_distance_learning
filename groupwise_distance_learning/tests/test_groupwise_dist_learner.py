@@ -6,7 +6,8 @@ Date: 2016/03/13
 import unittest
 from groupwise_distance_learning.tests.test_helper_func import load_sample_test_data
 from groupwise_distance_learning.groupwise_distance_learner import _groupwise_dist_learning_single_run
-
+from groupwise_distance_learning.groupwise_distance_learner import groupwise_dist_learning
+from groupwise_distance_learning.groupwise_distance_learner import GroupwiseDistLearner
 
 class TestGroupWiseDistLearnerRun(unittest.TestCase):
 
@@ -86,6 +87,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         print("buffer_group: {}".format(new_buffer_group))
 
     def test_single_run_04(self):
+
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
         # definte test data
@@ -110,6 +112,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         print("buffer_group: {}".format(new_buffer_group))
 
     def test_single_run_05(self):
+
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
         # definte test data
@@ -130,7 +133,47 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         self.assertTrue(is_ok)
 
 
+    def test_learner_01(self):
 
+        user_ids, user_profiles, user_connections = load_sample_test_data()
+
+        best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=2,
+                                            max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
+                                            init='even', verbose=True, C=0.1)
+
+        knowledge_pack, best_score = best_pack
+        new_dist_metrics, new_fit_group, new_buffer_group = knowledge_pack
+
+        print("--- leaner test (n_group=2) ---")
+        print("1st new_dist_metrics's distance metrics: {}".format(new_dist_metrics[0]))
+        print("1nd new_dist_metrics's distance metrics: {}".format(new_dist_metrics[1]))
+        print("new 1st fit_group: {}".format(new_fit_group[0]))
+        print("new 2nd fit_group: {}".format(new_fit_group[1]))
+        print("buffer_group: {}".format(new_buffer_group))
+
+    def test_learner_02(self):
+        user_ids, user_profiles, user_connections = load_sample_test_data()
+
+        best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=1,
+                                            max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
+                                            init='even', verbose=True, C=0.1)
+
+        knowledge_pack, best_score = best_pack
+        new_dist_metrics, new_fit_group, new_buffer_group = knowledge_pack
+
+        print("--- leaner test (n_group=1) ---")
+        print("1st new_dist_metrics's distance metrics: {}".format(new_dist_metrics[0]))
+        print("new 1st fit_group: {}".format(new_fit_group[0]))
+        print("buffer_group: {}".format(new_buffer_group))
+
+    def test_learner_class(self):
+        user_ids, user_profiles, user_connections = load_sample_test_data()
+
+        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1)
+        gwd_learner.fit(user_ids, user_profiles, user_connections)
+
+        print("--- learner class (n_group=2)---")
+        print("best score: {}".format(gwd_learner.get_score()))
 
 
 if __name__ == '__main__':

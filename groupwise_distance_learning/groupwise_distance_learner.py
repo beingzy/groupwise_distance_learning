@@ -296,6 +296,8 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     Returns;
     -------
     """
+
+    # entire run's execution time
     total_time = 0
 
     # validate the input data is compatible
@@ -348,9 +350,10 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                             n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
                             min_group_size=5, ks_alpha=0.05,
-                            sample_method="even",
-                            verbose=False, is_debug=False, random_state=None):
-    """ groupwise distance learning algorithm to classify users
+                            init="even",
+                            C=0.1, verbose=False, is_debug=False, random_state=None):
+    """ groupwise distance learning algorithm to classify users.
+    it returns: ((dist_metrics, fit_group, buffer_group), _max_fit_score)
 
     Parameters:
     ----------
@@ -371,7 +374,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     ks_alpha: alpha value for ks-test
         H0: distr.(conencted users) >= distr.(disconnected users)
 
-    sample_method: character, {'even', 'zipf')
+    init: character, {'even', 'zipf')
 
     verbose: boolean, optional, default value = False
        verbosity mode
@@ -381,11 +384,18 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
        is given it fixes the seed. Defaults to the global numpy random number
        generator
 
-    Returns;
-    -------
+
     """
 
     _validate_user_information(user_ids, user_profiles, user_connections)
+
+    if max_iter < 0:
+        msg = "Invalid number of initilizations n_group (={}) must be bigger than zero.".format(max_iter)
+        raise ValueError(msg)
+
+    if max_nogain_streak < 0:
+        msg = "Invalid number of initilizations n_nogain_streak (={}) must be bigger than zero.".format(max_iter)
+        raise ValueError(msg)
 
     # initiate containers
     dist_metrics = _init_dict_list(n_group)
@@ -394,20 +404,21 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     buffer_group = []
 
     # initiating the group's composition
-    sample_size = floor( len(user_ids) / n_group )
-    group_sizes = [sample_size] * n_group
-    # margin
-    margin = len(user_ids) - (sample_size * n_group)
-    if margin > 0:
-        group_sizes[0] += margin
+    if init == "even":
+        sample_size = floor( len(user_ids) / n_group )
+        group_sizes = [sample_size] * n_group
+        # margin
+        margin = len(user_ids) - (sample_size * n_group)
+        if margin > 0:
+            group_sizes[0] += margin
 
     # initiate fit_group, fit_pvals
     # by distributing users to different groups
     user_ids_copy = user_ids.copy()
     group_names = list(dist_metrics.keys())
+
     # assign users to each groups
     for gname, gsize in zip(group_names, group_sizes):
-
         # assign users to group
         draws = choice(user_ids_copy, gsize, replace=False)
         fit_group[gname] = draws
@@ -422,9 +433,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
         knowledge_pkgs = []
         timers = []
 
-    # =================
     # learning process
-    # =================
     _nogain_streak = 0
     _iterate_counter = 0
     _max_fit_score = 0
@@ -443,11 +452,10 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                                                        random_state)
         loop_duration = (datetime.now() - loop_start_time).total_seconds()
         dist_metrics, fit_group, fit_pvals, buffer_group = iter_res
-        knowledge_pack = (dist_metrics, fit_group, buffer_group)
+        knowledge_pack = (dist_metrics.copy(), fit_group.copy(), buffer_group.copy())
 
         # evaluate current knowledge pack
-        fit_score = _fit_score(fit_pvals, buffer_group)
-
+        fit_score = _fit_score(fit_pvals, buffer_group, C=C)
 
         if verbose:
             msg = "- {}th iteration's fit score: {:.2f}\n".format(_iterate_counter, fit_score)
@@ -472,30 +480,86 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         _iterate_counter += 1
 
-    return best_knowledge_pack
+    return best_knowledge_pack, _max_fit_score
 
 
 class GroupwiseDistLearner(object):
+    """ groupwise distance learning class
 
+    Parameters:
+    ----------
+    user_ids: list of all user_id
 
-    def __init__(self):
-        pass
+    user_profile: matrix-like of user profiles, records should align with user_ids
 
-    def _fit(self):
-        pass
+    user_graph: networkx.Graph instance stores user_connections information
 
-    def fit(self):
-        pass
+    n_group: integer, the number of groups to learn
 
-    def load_evaluator(self, score_funcs):
-        pass
+    max_iter: integer, the maximum number of iteration for learning
+
+    tol: float, tolerance for incremental gain in fit score
+
+    min_group_size: integer, the minimum number of members for a group
+
+    ks_alpha: alpha value for ks-test
+        H0: distr.(conencted users) >= distr.(disconnected users)
+
+    init: character, {'even', 'zipf')
+
+    verbose: boolean, optional, default value = False
+       verbosity mode
+
+    random_state: integer or numpy.RandomState, optional
+       the generator used to initialize the group composition. If an integer
+       is given it fixes the seed. Defaults to the global numpy random number
+       generator
+    """
+
+    def __init__(self, n_group=2, max_iter=200, max_nogain_streak=10,
+                 tol=0.01, min_group_size=5, ks_alpha=0.05,
+                 init="even", C=0.01, verbose=False,
+                 is_debug=False, random_state=None):
+        self._n_group = n_group
+        self._max_iter = max_iter
+        self._max_nogain_streak = max_nogain_streak
+        self._tol = tol
+        self._min_group_size = min_group_size
+        self._ks_alpha = ks_alpha
+        self._init = init
+        self._C = C
+        self._verbose = verbose
+        self._is_debug = is_debug
+        self._random_state = random_state
+        # attributes for learned results
+        self._dist_metrics = None
+        self._fit_group = None
+        self._buffer_group = None
+        self._score = None
+
+    def fit(self, user_ids, user_profiles, user_connections):
+
+        res = groupwise_dist_learning(user_ids, user_profiles, user_connections,
+                                      n_group=self._n_group, max_iter=self._max_iter,
+                                      max_nogain_streak=self._max_nogain_streak, tol=self._tol,
+                                      min_group_size=self._min_group_size, ks_alpha=self._ks_alpha,
+                                      init=self._init, C=self._C, verbose=self._verbose, is_debug=self._is_debug,
+                                      random_state=self._random_state)
+        # unpack results
+        knowledge_pack, best_score = res
+        dist_metrics, fit_group, buffer_group = knowledge_pack
+
+        self._score = best_score
+        self._dist_metrics = dist_metrics
+        self._fit_group = fit_group
+        self._buffer_group = buffer_group
 
     def get_score(self):
-        pass
+        return self._score
 
     def get_groupwise_weights(self):
-        pass
+        return self._dist_metrics
 
     def get_user_cluster(self):
-        pass
+        return self._fit_group, self._buffer_group
 
