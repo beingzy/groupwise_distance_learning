@@ -17,7 +17,7 @@ gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1)
 gwd_laraner.fit(user_ids, user_profiles, user_connections)
 
 # access learned results
-print(" the score of best learning metrics: {}".format()
+print(" the score of best learning metrics: {}".format(gwd_learner.get_score()) )
 
 learned_dist_metrics = gwd_learner.get_groupwise_weights()
 learned_clusters, buffer_group = gwd_learner.get_get_user_cluster()
