@@ -20,15 +20,6 @@ from groupwise_distance_learning.util_functions import ldm_train_with_list
 from groupwise_distance_learning.util_functions import find_fit_group
 
 
-def _init_embed_list(n):
-    """
-    """
-    ls = []
-    for i in range(n):
-        ls.append([])
-    return ls
-
-
 def _init_dict_list(k):
     """ create dictionary with k items, each
         item is a empty list
@@ -60,7 +51,6 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
     nfeat = user_profiles.shape[1]
     # restore user_profiles to DataFrame including
     user_profile_df = DataFrame(user_profiles)
-    user_profile_df.columns = ["feat_0", "feat_1", "feat_2"]
     user_profile_df["ID"] = user_ids
     # create data container
     new_dist_metrics = dist_metrics.copy()

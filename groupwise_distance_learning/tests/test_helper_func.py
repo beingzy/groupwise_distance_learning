@@ -36,6 +36,27 @@ def load_sample_test_data():
     return user_ids, user_profile_df, user_connections_df
 
 
+def load_simulated_test_data():
+    """ load simulationd data  with defined two groups """
+    _root_dir = get_file_parent_dir_path(level=2)
+    _data_dir = join(_root_dir, 'data', 'sim_two_groups')
+
+    user_profile_fpath = join(_data_dir, "user_profiles.csv")
+    user_connections_fpath = join(_data_dir, "friendships.csv")
+
+    # prepare user profile information
+    user_profile_df = pd.read_csv(user_profile_fpath, header=0, sep=",")
+    # unpack data
+    user_ids = user_profile_df.ID.tolist()
+    user_true_groups = user_profile_df.decision_style.tolist()
+    user_profile_df = user_profile_df.drop(["ID", "decision_style"], axis=1, inplace=False).as_matrix()
+
+    user_connections_df = pd.read_csv(user_connections_fpath, header=0, sep=",")
+    user_connections_df = (user_connections_df[user_connections_df.isFriend==1]
+                       .drop('isFriend', axis=1, inplace=False).astype(int).as_matrix())
+
+    return user_ids, user_profile_df, user_connections_df, user_true_groups
+
 
 
 

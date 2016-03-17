@@ -14,7 +14,7 @@ user_ids, user_profiles, user_connections = load_sample_test_data()
 
 # initiate learner
 gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1)
-gwd_laraner.fit(user_ids, user_profiles, user_connections)
+gwd_learner.fit(user_ids, user_profiles, user_connections)
 
 # access learned results
 print(" the score of best learning metrics: {}".format(gwd_learner.get_score()) )
