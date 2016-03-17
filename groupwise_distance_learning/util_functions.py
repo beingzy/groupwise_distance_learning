@@ -12,8 +12,6 @@ import networkx as nx
 from matplotlib import pyplot as plt
 
 from scipy.stats import rayleigh
-from scipy.stats import ks_2samp
-from numpy import linspace
 from numpy.random import choice
 from networkx import Graph
 
@@ -301,46 +299,3 @@ def find_fit_group(uid, dist_metrics, profile_df,
         max_pval = None
 
     return (best_group, max_pval)
-
-
-def get_fit_score(fit_pvals, buffer_group, c):
-    """ calculate the fit score given the member composite
-        and its pvalues with its group distance metrics, with
-        c determinng the strength of penalty for keeping a
-        larger number of users in buffer_group
-
-    Parameters:
-    -----------
-    fit_pvals: {dict}, {index: [pvalues]}
-    buffer_group: {list}, [userid, ...]
-    c: {float},
-    t: {integer} 1, 2 or 3, type of fit score
-
-    Returns:
-    --------
-    fit_score: {float}, fit score, a smaller value indidcate
-                a overall better fit
-
-    Examples:
-    ---------
-    fit_group = fit_group
-    fit_pvals = fit_pvals
-    buffer_group = buffer_group
-    c = 0.1
-    fscore = get_fit_score(fit_group, fit_pvals, buffer_group, c)
-    """
-
-    # weighted sum of pvalues
-    wsum_pval = 0
-    num_users = 0
-
-    for g, v in fit_pvals.iteritems():
-        wsum_pval += sum(np.array(v) * 1.0) * (len(v) * len(v))
-        num_users += len(v)
-
-    wsum_pval = wsum_pval * 1.0 / num_users
-
-    penalty = c * len(buffer_group)
-    fit_score = wsum_pval - penalty # smaller value indicates a better overall fit
-
-    return fit_score

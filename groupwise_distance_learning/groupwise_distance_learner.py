@@ -9,13 +9,15 @@ from networkx import Graph
 from math import floor
 from datetime import datetime
 
+from joblib import Parallel
+from joblib import delayed
+
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 from groupwise_distance_learning.util_functions import user_grouped_dist
 from groupwise_distance_learning.util_functions import user_dist_kstest
 from groupwise_distance_learning.util_functions import users_filter_by_weights
 from groupwise_distance_learning.util_functions import ldm_train_with_list
 from groupwise_distance_learning.util_functions import find_fit_group
-from groupwise_distance_learning.util_functions import get_fit_score
 
 
 def _init_embed_list(n):
@@ -350,8 +352,8 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                             n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
                             min_group_size=5, ks_alpha=0.05,
-                            init="even",
-                            C=0.1, verbose=False, is_debug=False, random_state=None):
+                            init="even", C=0.1,
+                            verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users.
     it returns: ((dist_metrics, fit_group, buffer_group), _max_fit_score)
 
@@ -450,6 +452,8 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                                                        user_ids, user_profiles, user_connections,
                                                        ks_alpha, min_group_size, verbose,
                                                        random_state)
+
+
         loop_duration = (datetime.now() - loop_start_time).total_seconds()
         dist_metrics, fit_group, fit_pvals, buffer_group = iter_res
         knowledge_pack = (dist_metrics.copy(), fit_group.copy(), buffer_group.copy())
