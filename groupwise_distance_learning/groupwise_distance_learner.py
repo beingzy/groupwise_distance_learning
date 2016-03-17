@@ -207,7 +207,6 @@ def _fit_score(pvals, buffer_group, C=1):
     """
     sum_pvals = 0
     num_grouped_users = 0
-    total_users = 0
 
     for group in pvals.keys():
         sum_pvals += sum(pvals[group])

@@ -25,5 +25,5 @@ learned_dist_metrics = gwd_learner.get_groupwise_weights()
 # learned_fit_groups, whithin members have suitable distance metrics to decode their perferrence
 # learned_buffer_groups, whithin members failed to find customized distance metrics to reprsent their perferrence
 #    they will be treated with generic unweighted diteance metrics 
-learned_fit_groups, learned_buffer_group = gwd_learner.get_get_user_cluster()
+learned_fit_groups, learned_buffer_group = gwd_learner.get_user_cluster()
 ```
