@@ -29,7 +29,7 @@ def kstest_2samp_greater(x, y):
     * ts: <numeric> tests statistics of KS-tests
     * pvalue: <numeric> p-value fo tests statistics
     """
-    setting = array(["greater"], dtype="str")
+    setting = array(["less"], dtype="str")
     test_res = rstats.ks_test(x, y, alternative=setting)
     ts, pval = test_res[0][0], test_res[1][0]
     return ts, pval

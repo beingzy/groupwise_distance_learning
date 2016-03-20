@@ -3,6 +3,7 @@ Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/MM/DD
 """
 from datetime import datetime
+import numpy as np
 from numpy.random import choice
 from pandas import DataFrame
 from networkx import Graph
@@ -28,6 +29,36 @@ def _init_dict_list(k):
     for ii in range(k):
         res_dict[ii] = []
     return res_dict
+
+
+def _convert_array_to_list(x):
+    """ convert data stucture's memeber to from np.array to list"""
+    if isinstance(x, dict):
+        for key in x.keys():
+            item = x[key]
+            if isinstance(item, np.ndarray):
+                x[key] = item.tolist()
+    if isinstance(x, np.ndarray):
+        x = x.tolist()
+    return x
+
+
+def all_to_list(func):
+    """decorator: convert nd.array to list"""
+
+    def func_wrapper(*args, **kwargs):
+        res = func(*args, **kwargs)
+        new_res = []
+
+        for ii in res:
+            new_res.append(_convert_array_to_list(ii))
+
+        if isinstance(res, tuple):
+            return tuple(new_res)
+        else:
+            return new_res
+
+    return func_wrapper
 
 
 def _validate_user_information(user_ids, user_profiles, user_connections):
@@ -95,6 +126,9 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
     fit_group, fit_pvals, unfit_group
     """
 
+    fit_group = _convert_array_to_list(fit_group)
+    fit_pvals = _convert_array_to_list(fit_pvals)
+
     # restore user_profiles to DataFrame including
     user_profile_df = DataFrame(user_profiles)
     user_profile_df["ID"] = user_ids
@@ -116,7 +150,9 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
             if ii_pval < ks_alpha:
                 # remove the user from fit group, retreive [0] to ensure slice is integer
                 idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id][0]
+                # fit_group[gg].remove(idx)
                 del fit_group[gg][idx]
+                # fit_pvals[gg].remove(idx)
                 del fit_pvals[gg][idx]
                 # add the user into unfit group
                 if gg in unfit_group:
