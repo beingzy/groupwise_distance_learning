@@ -378,7 +378,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                             n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
                             min_group_size=5, ks_alpha=0.05,
-                            init="even", C=0.1,
+                            init="zipf", C=0.1,
                             verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users.
     it returns: ((dist_metrics, fit_group, buffer_group), _max_fit_score)
@@ -521,7 +521,13 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         _iterate_counter += 1
 
-    return best_knowledge_pack, _max_fit_score
+    if is_debug:
+        debug_info = {"timers": timers,
+                      "fs_hist": fs_hist,
+                      "knowledge_pkgs": knowledge_pkgs}
+        return best_knowledge_pack, _max_fit_score, debug_info
+    else:
+        return best_knowledge_pack, _max_fit_score
 
 
 class GroupwiseDistLearner(object):
@@ -577,6 +583,7 @@ class GroupwiseDistLearner(object):
         self._fit_group = None
         self._buffer_group = None
         self._score = None
+        self._debug_info = None
 
     def fit(self, user_ids, user_profiles, user_connections):
 
@@ -587,8 +594,13 @@ class GroupwiseDistLearner(object):
                                       init=self._init, C=self._C, verbose=self._verbose, is_debug=self._is_debug,
                                       random_state=self._random_state)
         # unpack results
-        knowledge_pack, best_score = res
-        dist_metrics, fit_group, buffer_group = knowledge_pack
+        if self._is_debug:
+            knowledge_pack, best_score, debug_info = res
+            dist_metrics, fit_group, buffer_group = knowledge_pack
+            self._debug_info = debug_info
+        else:
+            knowledge_pack, best_score = res
+            dist_metrics, fit_group, buffer_group = knowledge_pack
 
         self._score = best_score
         self._dist_metrics = dist_metrics
@@ -603,4 +615,7 @@ class GroupwiseDistLearner(object):
 
     def get_user_cluster(self):
         return self._fit_group, self._buffer_group
+
+    def get_debug_info(self):
+        return self._debug_info
 

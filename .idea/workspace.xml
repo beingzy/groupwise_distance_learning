@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="11f45405-4fa3-42cd-8ee1-e01f5a296f52" name="Default" comment="">
+    <list default="true" id="11f45405-4fa3-42cd-8ee1-e01f5a296f52" name="Default" comment="export debug_info">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_groupwise_dist_learner.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/tests/test_groupwise_dist_learner.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" afterPath="$PROJECT_DIR$/groupwise_distance_learning/util_functions.py" />
     </list>
     <ignored path="groupwise_distance_learning.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -41,8 +39,8 @@
       <file leaf-file-name="groupwise_distance_learner.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5718475">
-              <caret line="444" column="29" selection-start-line="444" selection-start-column="29" selection-end-line="444" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.8005865">
+              <caret line="619" column="31" selection-start-line="619" selection-start-column="31" selection-end-line="619" selection-end-column="31" />
               <folding>
                 <element signature="e#0#89#1" expanded="false" />
                 <element signature="e#90#119#0" expanded="true" />
@@ -543,7 +541,13 @@
       <option name="project" value="LOCAL" />
       <updated>1458480549773</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="add zipf as alternative initiliazation of group sizes within gorupwise_dist_learner">
+      <created>1458482127577</created>
+      <option name="number" value="00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1458482127577</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TodoView">
@@ -604,7 +608,8 @@
     <MESSAGE value="update README.md" />
     <MESSAGE value="update ks_test function by definint alternative to 'greater' src: https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ks.test.html" />
     <MESSAGE value="create decorator to ensure all output's basic element are list rather than ndarray" />
-    <option name="LAST_COMMIT_MESSAGE" value="create decorator to ensure all output's basic element are list rather than ndarray" />
+    <MESSAGE value="add zipf as alternative initiliazation of group sizes within gorupwise_dist_learner" />
+    <option name="LAST_COMMIT_MESSAGE" value="add zipf as alternative initiliazation of group sizes within gorupwise_dist_learner" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1036,8 +1041,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/groupwise_distance_learner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5718475">
-          <caret line="444" column="29" selection-start-line="444" selection-start-column="29" selection-end-line="444" selection-end-column="29" />
+        <state vertical-scroll-proportion="0.8005865">
+          <caret line="619" column="31" selection-start-line="619" selection-start-column="31" selection-end-line="619" selection-end-column="31" />
           <folding>
             <element signature="e#0#89#1" expanded="false" />
             <element signature="e#90#119#0" expanded="true" />
