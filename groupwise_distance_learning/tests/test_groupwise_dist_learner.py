@@ -166,10 +166,19 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         print("new 1st fit_group: {}".format(new_fit_group[0]))
         print("buffer_group: {}".format(new_buffer_group))
 
-    def test_learner_class(self):
+    def test_learner_class_init_even(self):
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
-        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1)
+        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="even")
+        gwd_learner.fit(user_ids, user_profiles, user_connections)
+
+        print("--- learner class (n_group=2)---")
+        print("best score: {}".format(gwd_learner.get_score()))
+
+    def test_learner_class_init_zipf(self):
+        user_ids, user_profiles, user_connections = load_sample_test_data()
+
+        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="zipf")
         gwd_learner.fit(user_ids, user_profiles, user_connections)
 
         print("--- learner class (n_group=2)---")

@@ -19,6 +19,7 @@ from groupwise_distance_learning.util_functions import user_dist_kstest
 from groupwise_distance_learning.util_functions import users_filter_by_weights
 from groupwise_distance_learning.util_functions import ldm_train_with_list
 from groupwise_distance_learning.util_functions import find_fit_group
+from groupwise_distance_learning.util_functions import zipf
 
 
 def _init_dict_list(k):
@@ -431,12 +432,23 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     buffer_group = []
 
     # initiating the group's composition
-    if init == "even":
-        sample_size = floor( len(user_ids) / n_group )
+    total_users = len(user_ids)
+
+    if init == "zipf":
+        group_sizes = [int(prob * total_users) for prob in zipf(n_group)]
+        # margin
+        margin = total_users - sum(group_sizes)
+        if margin > 0:
+            # append extra user cap to first group
+            group_sizes[0] += margin
+    else:
+        # elif init == "even"
+        sample_size = floor( total_users / n_group )
         group_sizes = [sample_size] * n_group
         # margin
-        margin = len(user_ids) - (sample_size * n_group)
+        margin = total_users - (sample_size * n_group)
         if margin > 0:
+            # append extra user cap to first group
             group_sizes[0] += margin
 
     # initiate fit_group, fit_pvals

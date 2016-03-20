@@ -20,6 +20,24 @@ from learning_dist_metrics.dist_metrics import weighted_euclidean
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 
 
+def zipf_pdf(k, n, s=1):
+    """ return the probability of nth rank
+        Parameters:
+        ----------
+        k: {int} kth rank
+        n: {int} total number of elemnets
+        s: {float} distribution parameter
+    """
+    num = 1.0 / (k ** s)
+    den = sum([1.0 / ((ii + 1) ** s) for ii in range(n)])
+    return num / den
+
+
+def zipf(n, s=1):
+    """return zipf distributions"""
+    return [zipf_pdf(k, n, s) for k in range(1, n)]
+
+
 def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
     """ return vector of weighted distance of a user vs. user's conencted users,
     and a vector of weighted distnces of a user vs. user's non-connected users.
