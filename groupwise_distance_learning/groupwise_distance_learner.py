@@ -378,7 +378,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                             n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
                             min_group_size=5, ks_alpha=0.05,
-                            init="zipf", C=0.1,
+                            init="zipf", C=0.1, n_jobs=1,
                             verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users.
     it returns: ((dist_metrics, fit_group, buffer_group), _max_fit_score)
@@ -479,10 +479,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
     best_knowledge_pack = None
 
-    while _nogain_streak < max_nogain_streak:
-
-        if _iterate_counter > max_iter:
-            break
+    for ii in range(max_iter):
 
         loop_start_time = datetime.now()
         iter_res = _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
@@ -520,6 +517,9 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
             knowledge_pkgs.append(knowledge_pack)
 
         _iterate_counter += 1
+
+        if _nogain_streak >= max_nogain_streak:
+            break
 
     if is_debug:
         debug_info = {"timers": timers,
