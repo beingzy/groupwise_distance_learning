@@ -4,6 +4,8 @@ Collection of Distance Metrics
 import pandas as pd
 from numpy import sqrt
 from scipy.spatial.distance import euclidean
+from numba import double
+from numba import jit, autojit
 
 
 def weighted_euclidean(x, y, w=None):
@@ -11,15 +13,15 @@ def weighted_euclidean(x, y, w=None):
 
     distance = sqrt( sum( w[i]*(x[i] - y[i])^2 ) )
     """
-    if len(x) != len(y):
-        print( "ERROR: length(x) is different from length(y)!" )
-
     if w is None:
-        w = [1] * len(x)
-
-    x = [sqrt(i_w) * i_x for i_w, i_x in zip(w, x)]
-    y = [sqrt(i_w) * i_y for i_w, i_y in zip(w, y)]
-    return euclidean(x, y)
+        D = 0
+        for xi, yi in zip(x, y):
+            D += (xi - yi) * (xi - yi)
+    else:
+        D = 0
+        for xi, yi, wi in zip(x, y, w):
+            D += (xi - yi) * (xi - yi) * wi * wi
+    return sqrt(D)
 
 
 def pairwise_dist_wrapper(pair, data, weights=None):
@@ -81,6 +83,7 @@ def all_pairwise_dist(pair_list, data, weights=None):
     return dist
 
 
+@autojit
 def sum_grouped_dist(pair_list, data, weights=None):
     """ Return the sum of distance
 
@@ -100,7 +103,10 @@ def sum_grouped_dist(pair_list, data, weights=None):
     p = [[0, 1], [0, 4], [3, 4]]
     sum_dist = sum_grouped_dist(p, data)
     """
-    return sum(all_pairwise_dist(pair_list, data, weights))
+    sum_dist = 0
+    for pair in pair_list:
+        sum_dist += pairwise_dist_wrapper(pair, data, weights)
+    return sum_dist
 
 
 def squared_sum_grouped_dist(pair_list, data, weights=None):
