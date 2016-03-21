@@ -139,7 +139,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
 
         best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=2,
                                             max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
-                                            init='even', verbose=True, C=0.1)
+                                            init='zipf', verbose=True, C=0.1)
 
         knowledge_pack, best_score = best_pack
         new_dist_metrics, new_fit_group, new_buffer_group = knowledge_pack
@@ -156,7 +156,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
 
         best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=1,
                                             max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
-                                            init='even', verbose=True, C=0.1)
+                                            init='zipf', verbose=True, C=0.1)
 
         knowledge_pack, best_score = best_pack
         new_dist_metrics, new_fit_group, new_buffer_group = knowledge_pack
@@ -169,19 +169,19 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
     def test_learner_class_init_even(self):
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
-        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="even")
+        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="even", max_iter=10, verbose=True)
         gwd_learner.fit(user_ids, user_profiles, user_connections)
 
-        print("--- learner class (n_group=2)---")
+        print("--- learner class (n_group=2) with init='even' ---")
         print("best score: {}".format(gwd_learner.get_score()))
 
     def test_learner_class_init_zipf(self):
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
-        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="zipf")
+        gwd_learner = GroupwiseDistLearner(n_group=2, min_group_size=1, init="zipf", max_iter=10, verbose=True)
         gwd_learner.fit(user_ids, user_profiles, user_connections)
 
-        print("--- learner class (n_group=2)---")
+        print("--- learner class (n_group=2) with init='zipf' ---")
         print("best score: {}".format(gwd_learner.get_score()))
 
 

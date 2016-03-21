@@ -35,7 +35,7 @@ def zipf_pdf(k, n, s=1):
 
 def zipf(n, s=1):
     """return zipf distributions"""
-    return [zipf_pdf(k, n, s) for k in range(1, n)]
+    return [zipf_pdf(k, n, s) for k in range(1, n+1)]
 
 
 def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
