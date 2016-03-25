@@ -9,10 +9,12 @@ from itertools import combinations
 
 import numpy as np
 from scipy.optimize import minimize
+import networkx
 
 from learning_dist_metrics.dist_metrics import squared_sum_grouped_dist
 from learning_dist_metrics.dist_metrics import sum_grouped_dist
 from learning_dist_metrics.dist_metrics import weighted_euclidean
+from learning_dist_metrics.dist_metrics import WeightedDistanceTester
 
 
 class LDM(object):
@@ -36,7 +38,7 @@ class LDM(object):
 
     VERSION = "0.2"
 
-    def __init__(self, solver_method="L-BFGS-B", report_excution_time=True,
+    def __init__(self, solver_method="SLSQP", report_excution_time=True,
                  is_debug=False):
 
         if not solver_method in ["L-BFGS-B", "SLSQP"]:
@@ -68,7 +70,6 @@ class LDM(object):
         _ratio: float
         """
         self._fit(X, S, D)
-        return self
 
     def fit_transform(self, X, S, D=None):
         """ Fit the model with X, S, D and conduct transformation on X
@@ -98,6 +99,7 @@ class LDM(object):
 
         Parameters:
         ----------
+        user_id: {vector-like}, user
         X: {matrix-like, np.array}, shape (n_sample, n_features) matrix of
            observations with 1st column keeping observation ID
         S: {vector-like, list} a list of tuples which define a pair of data
@@ -115,11 +117,9 @@ class LDM(object):
         #    X = X.as_matrix()
         try:
             ids = X["ID"]
-            X = X[[c for c in X.columns if c != "ID"]]
-        except ValueError:
-            print( "Oops! No 'ID' column is found !" )
-            # ids = [int(i) for i in X.ix[:, 0]]
-            # X = X.ix[:, 1:]
+            X = X.drop(["ID"], axis=1, inplace=False)
+        except:
+            print( "Oops! No 'ID' column is found !")
 
         n_sample, n_features = X.shape
 
@@ -130,7 +130,7 @@ class LDM(object):
             all_pairs = [p for p in combinations(ids, 2)]
             D = get_exclusive_pairs(all_pairs, S)
         else:
-            # if D is provided, keep only users not being
+            # if D is provided, keep only users being
             # covered either by S or D
             covered_items = get_unique_items(S, D)
             keep_items = [find_index(i, ids) for i in ids \
@@ -143,10 +143,12 @@ class LDM(object):
         S_idx = [(find_index(a, ids), find_index(b, ids)) for (a, b) in S]
         D_idx = [(find_index(a, ids), find_index(b, ids)) for (a, b) in D]
 
+        grouped_distance_container = WeightedDistanceTester(X, S_idx, D_idx)
+
         def objective_func(w):
-            a = squared_sum_grouped_dist(S_idx, X, w) * 1.0
-            b = sum_grouped_dist(D_idx, X, w) * 1.0
-            return a - b
+            #a = squared_sum_grouped_dist(S_idx, X, w) * 1.0
+            #b = sum_grouped_dist(D_idx, X, w) * 1.0
+            return grouped_distance_container.update(w)
 
         if self._is_debug:
             try:
@@ -189,9 +191,9 @@ class LDM(object):
         """
         n_sample, n_features = X.shape
         trans_matrix = self._transform_matrix
-        if not len(trans_matrix) == n_features:
-            raise ValueError('Transformation matrix is not \
-                compatiable with X!')
+        if len(trans_matrix) != n_features:
+            raise ValueError("Transformation matrix is not",
+                "compatiable with X!")
         X_new = self._transform_matrix * X
         return X_new
 

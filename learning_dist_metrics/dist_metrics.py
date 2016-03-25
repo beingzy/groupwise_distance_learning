@@ -2,10 +2,8 @@
 Collection of Distance Metrics
 """
 import pandas as pd
+import numpy as np
 from numpy import sqrt
-from scipy.spatial.distance import euclidean
-from numba import double
-from numba import jit, autojit
 
 
 def weighted_euclidean(x, y, w=None):
@@ -20,7 +18,7 @@ def weighted_euclidean(x, y, w=None):
     else:
         D = 0
         for xi, yi, wi in zip(x, y, w):
-            D += (xi - yi) * (xi - yi) * wi * wi
+            D += (xi - yi) * (xi - yi) * wi
     return sqrt(D)
 
 
@@ -83,7 +81,6 @@ def all_pairwise_dist(pair_list, data, weights=None):
     return dist
 
 
-@autojit
 def sum_grouped_dist(pair_list, data, weights=None):
     """ Return the sum of distance
 
@@ -128,6 +125,47 @@ def squared_sum_grouped_dist(pair_list, data, weights=None):
     p = [[0, 1], [0, 4], [3, 4]]
     sum_dist = squared_sum_grouped_dist(p, data)
     """
-    dist = all_pairwise_dist(pair_list, data, weights)
-    dist_squared = [d * d for d in dist]
-    return sum(dist_squared)
+    sum_squared_dist = 0
+    for pair in pair_list:
+        dist = pairwise_dist_wrapper(pair, data, weights)
+        sum_squared_dist += dist * dist
+    #dist = all_pairwise_dist(pair_list, data, weights)
+    #dist_squared = [d * d for d in dist]
+    #return sum(dist_squared)
+    return sum_squared_dist
+
+
+class WeightedDistanceTester(object):
+
+    def __init__(self, user_profiles, sim_edges, diff_edges):
+        self._sim_dist_array = self._get_1d_squared_diff(sim_edges, user_profiles)
+        self._diff_dist_array = self._get_1d_squared_diff(diff_edges, user_profiles)
+
+    def _get_1d_squared_diff(self, edges, user_profiles):
+        n_obs, n_feat = len(edges), user_profiles.shape[1]
+        dist_1ds = np.empty((n_obs, n_feat))
+        if isinstance(user_profiles, np.ndarray):
+            for ii, e in enumerate(edges):
+                dist_1ds[ii, :] = user_profiles[e[0], :] - user_profiles[e[1], :]
+        elif isinstance(user_profiles, pd.DataFrame):
+            for ii, e in enumerate(edges):
+                dist_1ds[ii, :] = user_profiles.iloc[e[0], :] - user_profiles.iloc[e[1], :]
+        else:
+            msg = " ".join(["user_profiles is in unsupported data structures",
+                            "(it must be numpy.ndarray or pandas.DataFrame)!"])
+            raise ValueError(msg)
+        return dist_1ds
+
+    def _get_sim_agg_info(self, weights):
+        sim_sum_squared = (np.square(self._sim_dist_array * weights)).sum(axis=1).sum()
+        return float(sim_sum_squared)
+
+    def _get_diff_agg_info(self, weights):
+        """ return sum of distance """
+        diff_sum = np.sqrt((np.square(self._diff_dist_array * weights)).sum(axis=1)).sum()
+        return float(diff_sum)
+
+    def update(self, weights):
+        sim_info = self._get_sim_agg_info(weights)
+        diff_info = self._get_diff_agg_info(weights)
+        return sim_info - diff_info
