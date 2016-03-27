@@ -26,7 +26,7 @@
       <file leaf-file-name="kstest.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/kstest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
+            <state relative-caret-position="-168">
               <caret line="33" column="51" selection-start-line="33" selection-start-column="51" selection-end-line="33" selection-end-column="51" />
               <folding>
                 <element signature="e#98#123#0" expanded="true" />
@@ -35,10 +35,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="util_functions.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="util_functions.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/util_functions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-204">
+            <state relative-caret-position="153">
               <caret line="45" column="14" selection-start-line="45" selection-start-column="14" selection-end-line="45" selection-end-column="14" />
               <folding />
             </state>
@@ -69,11 +69,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ldm.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ldm.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/learning_dist_metrics/ldm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="297" column="27" selection-start-line="297" selection-start-column="27" selection-end-line="297" selection-end-column="27" />
+            <state relative-caret-position="2671">
+              <caret line="274" column="39" selection-start-line="274" selection-start-column="39" selection-end-line="274" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -184,20 +184,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="groupwise_distance_learning" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="groupwise_distance_learning" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="groupwise_distance_learning" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="learning_dist_metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -562,7 +548,14 @@
       <option name="project" value="LOCAL" />
       <updated>1459092424165</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="keep updated code in commented area to avoid breaking the code. Hold the implementation of udpates untile successful refactoring of major API argument.">
+      <created>1459092508552</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1459092508552</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -1039,9 +1032,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/learning_dist_metrics/ldm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2671">
+          <caret line="274" column="39" selection-start-line="274" selection-start-column="39" selection-end-line="274" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/kstest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
+        <state relative-caret-position="-168">
           <caret line="33" column="51" selection-start-line="33" selection-start-column="51" selection-end-line="33" selection-end-column="51" />
           <folding>
             <element signature="e#98#123#0" expanded="true" />
@@ -1051,16 +1052,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/groupwise_distance_learning/util_functions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-204">
+        <state relative-caret-position="153">
           <caret line="45" column="14" selection-start-line="45" selection-start-column="14" selection-end-line="45" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/learning_dist_metrics/ldm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="297" column="27" selection-start-line="297" selection-start-column="27" selection-end-line="297" selection-end-column="27" />
           <folding />
         </state>
       </provider>
