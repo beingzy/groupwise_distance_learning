@@ -92,6 +92,7 @@ def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
     res = [sim_dist_vec, diff_dist_vec]
     return res
 
+
 def user_dist_kstest(sim_dist_vec, diff_dist_vec,
                      fit_rayleigh=False, _n=100):
 
@@ -135,11 +136,11 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
         samp_nonfriend = rayleigh.rvs(nonfriend_param[0], nonfriend_param[1], _n)
 
         # ouput p-value of ks-tests
-        res = kstest_2samp_greater(samp_friend, samp_nonfriend)[1]
+        test_stat, pval = kstest_2samp_greater(samp_friend, samp_nonfriend)
     else:
-        res = kstest_2samp_greater(sim_dist_vec, diff_dist_vec)[1]
+        test_stat, pval = kstest_2samp_greater(sim_dist_vec, diff_dist_vec)
 
-    return res
+    return pval
 
 
 def users_filter_by_weights(weights, profile_df, friends_networkx,
