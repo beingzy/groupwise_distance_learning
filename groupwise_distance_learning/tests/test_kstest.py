@@ -17,6 +17,8 @@ class TestKSTest2SampGreater(unittest.TestCase):
         self._x = normal(0, 1, nsize)
         self._y = normal(0.5, 1, nsize)
         self._z = normal(0.1, 2, nsize)
+        self._y_large = normal(0.5, 1, nsize * 4)
+        self._z_large = normal(0.1, 1, nsize * 4)
 
     def test_xgreatery(self):
         # accept null hypothesis
@@ -62,6 +64,48 @@ class TestKSTest2SampGreater(unittest.TestCase):
             print("SUCCCESS: null hypothesis (x > z) should be not rejected (alpha=0.05)!")
 
         self.assertTrue(is_match)
+
+    def test_xgreatery_large(self):
+        # accept null hypothesis
+        res_ts, res_pval = kstest_2samp_greater(self._x, self._y_large)
+
+        print("res_ts: {}".format(res_ts))
+        print("res_pval: {}".format(res_pval))
+
+        if res_pval > 0.05:
+            print("SUCCCESS: null hypothesis (x is not less than y) should hold (large size y, alpha=0.05)!")
+            is_ok = True
+        else:
+            is_ok = False
+
+        self.assertTrue(is_ok)
+
+    def test_ygreaterx_large(self):
+        # reject null hypothesis
+        res_ts, res_pval = kstest_2samp_greater(self._y_large, self._x)
+        true_ts = 0.19
+        true_pval = 0.03
+
+        print("res_tes: {}".format(res_ts))
+        print("res_tes: {}".format(res_pval))
+
+        if res_pval < 0.05:
+            print("SUCCCESS: null hypothesis (y > x) should be rejected (large size y, alpha=0.05)!")
+
+
+    def test_xgreaterz_large(self):
+        # accept null hypothesis
+        res_ts, res_pval = kstest_2samp_greater(self._x, self._z_large)
+        true_ts = 0.11
+        true_pval = 0.3
+
+        print("res_tes: {}".format(res_ts))
+        print("res_tes: {}".format(res_pval))
+
+        if res_pval > 0.05:
+            print("SUCCCESS: null hypothesis (x > z) should be not rejected (large size z, alpha=0.05)!")
+
+
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ Date: 2016/03/12
 
 import unittest
 
+from pandas import DataFrame
 from networkx import Graph
 
 from groupwise_distance_learning.tests.test_helper_func import load_sample_test_data
@@ -20,10 +21,14 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
 
     def test_validate_user_informationg_with_good_data(self):
         user_ids, user_profile_df, user_connection_df = load_sample_test_data()
+
+        user_graph = Graph()
+        user_graph.add_edges_from(user_connection_df)
+
         try:
             _validate_user_information(user_ids = user_ids,
                                        user_profiles = user_profile_df,
-                                       user_connections = user_connection_df)
+                                       user_graph = user_graph)
             is_ok = True
         except:
             is_ok = False
@@ -32,14 +37,36 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
     def test_validate_user_informationg_with_bad_data(self):
 
         user_ids, user_profile_df, user_connection_df = load_sample_test_data()
+
+        user_graph = Graph()
+        user_graph.add_edges_from(user_connection_df)
+
         try:
             # remove first user_id's record
             _validate_user_information(user_ids = user_ids[1:],
                                        user_profiles = user_profile_df,
-                                       user_connections = user_connection_df)
+                                       user_graph = user_graph)
             is_ok = False
         except:
             is_ok = True
+        self.assertTrue(is_ok)
+
+    def test_validate_user_informationg_with_good_graph_data(self):
+        user_ids, user_profile_df, user_connection_df = load_sample_test_data()
+
+        if isinstance(user_connection_df, DataFrame):
+            user_connection_df = user_connection_df.as_matrix()
+
+        user_graph = Graph()
+        user_graph.add_edges_from(user_connection_df)
+
+        try:
+            _validate_user_information(user_ids=user_ids,
+                                       user_profiles=user_profile_df,
+                                       user_graph=user_graph)
+            is_ok = True
+        except:
+            is_ok = False
         self.assertTrue(is_ok)
 
     def test_update_groupwise_dist(self):
