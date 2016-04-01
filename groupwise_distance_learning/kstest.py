@@ -38,8 +38,12 @@ def kstest_2samp_greater(x, y):
     # msg = "y's type; {}, nrow: {}, ncol: {}".format(type(y), n, m)
     # print(msg)
 
-    # if len(y) > 1.2 * len(x):
-    #     y = choice(y, size=len(x), replace=False)
+    x = x.ravel()
+    y = y.ravel()
+
+    x_size = len(x)
+    if len(y) > x_size:
+        y = choice(y, size=x_size, replace=False)
 
     setting = array(["less"], dtype="str")
     test_res = rstats.ks_test(x, y, alternative=setting)
