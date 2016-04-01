@@ -254,7 +254,7 @@ def _fit_score(pvals, buffer_group, C=1):
 
     score = sum_pvals / num_grouped_users - C * num_buffer_users / total_users
 
-    return (score, 4)
+    return score
 
 
 def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
