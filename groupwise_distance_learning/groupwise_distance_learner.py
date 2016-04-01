@@ -254,7 +254,7 @@ def _fit_score(pvals, buffer_group, C=1):
 
     score = sum_pvals / num_grouped_users - C * num_buffer_users / total_users
 
-    return round(score, 4)
+    return (score, 4)
 
 
 def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
@@ -376,7 +376,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 
 
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
-                            n_group=2, max_iter=200, max_nogain_streak=20, tol=0.01,
+                            n_group=2, max_iter=200, max_nogain_streak=10, tol=0.01,
                             min_group_size=5, ks_alpha=0.05,
                             init="zipf", C=0.1, n_jobs=1,
                             verbose=False, is_debug=False, random_state=None):
@@ -496,8 +496,9 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
         fit_score = _fit_score(fit_pvals, buffer_group, C=C)
 
         if verbose:
-            msg = "- {}th iteration's fit score: {:.2f}\n".format(_iterate_counter, fit_score)
-            msg += "- time cost: {:.0f} seconds".format(loop_duration)
+            msg =  "-- {}th iteration's fit score: {:.4f}\n".format(_iterate_counter, fit_score)
+            msg += "-- time cost: {:.0f} seconds".format(loop_duration)
+            msg += "-- size of buffer group: {}".format(len(buffer_group))
             print(msg)
 
         # capture the best learned knowledge
@@ -518,8 +519,13 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         _iterate_counter += 1
 
+        if _nogain_streak % 5 == 0:
+            # reduce ks_alpha at every 5 non-increment gain
+            ks_alpha -= ks_alpha * 0.1
+
         if _nogain_streak >= max_nogain_streak:
             break
+
 
     if is_debug:
         debug_info = {"timers": timers,
