@@ -496,9 +496,9 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
         fit_score = _fit_score(fit_pvals, buffer_group, C=C)
 
         if verbose:
-            msg =  "-- {}th iteration's fit score: {:.4f}\n".format(_iterate_counter, fit_score)
-            msg += "-- time cost: {:.0f} seconds".format(loop_duration)
-            msg += "-- size of buffer group: {}".format(len(buffer_group))
+            msg = "-- {}th iteration's fit score: {:.4f}\n".format(_iterate_counter, fit_score)
+            msg += "-- time cost: {:.0f} seconds\n".format(loop_duration)
+            msg += "-- size of buffer group: {}\n".format(len(buffer_group))
             print(msg)
 
         # capture the best learned knowledge
