@@ -9,9 +9,7 @@ from pandas import DataFrame
 from networkx import Graph
 from math import floor
 from datetime import datetime
-
-from joblib import Parallel
-from joblib import delayed
+from copy import deepcopy
 
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 from groupwise_distance_learning.util_functions import user_grouped_dist
@@ -494,7 +492,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         loop_duration = (datetime.now() - loop_start_time).total_seconds()
         dist_metrics, fit_group, fit_pvals, buffer_group = iter_res
-        knowledge_pack = (dist_metrics.copy(), fit_group.copy(), buffer_group.copy())
+        knowledge_pack = deepcopy(dist_metrics), deepcopy(fit_group), deepcopy(buffer_group)
 
         # evaluate current knowledge pack
         fit_score = _fit_score(fit_pvals, buffer_group, C=C)
