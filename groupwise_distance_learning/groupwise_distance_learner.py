@@ -577,15 +577,19 @@ class GroupwiseDistLearner(object):
        generator
     """
 
-    def __init__(self, n_group=2, max_iter=200, max_nogain_streak=10,
-                 min_group_size=5, ks_alpha=0.05,
-                 init="even", C=0.01, verbose=False,
+    def __init__(self, n_group=2,
+                 max_iter=200, max_nogain_streak=10,
+                 min_group_size=5,
+                 ks_alpha=0.95, alpha_update_freq = 5, learning_rate = 0.1,
+                 C=0.1, init="zipf", verbose=False,
                  is_debug=False, random_state=None):
         self._n_group = n_group
         self._max_iter = max_iter
         self._max_nogain_streak = max_nogain_streak
         self._min_group_size = min_group_size
         self._ks_alpha = ks_alpha
+        self._alpha_update_freq = alpha_update_freq
+        self._learning_rate = learning_rate
         self._init = init
         self._C = C
         self._verbose = verbose
@@ -603,7 +607,9 @@ class GroupwiseDistLearner(object):
         res = groupwise_dist_learning(user_ids, user_profiles, user_connections,
                                       n_group=self._n_group, max_iter=self._max_iter,
                                       max_nogain_streak=self._max_nogain_streak,
-                                      min_group_size=self._min_group_size, ks_alpha=self._ks_alpha,
+                                      min_group_size=self._min_group_size,
+                                      ks_alpha=self._ks_alpha,
+                                      alpha_update_freq=self._alpha_update_freq, learning_rate=self._learning_rate,
                                       init=self._init, C=self._C, verbose=self._verbose, is_debug=self._is_debug,
                                       random_state=self._random_state)
         # unpack results
