@@ -46,7 +46,6 @@ def _convert_array_to_list(x):
 
 def all_to_list(func):
     """decorator: convert nd.array to list"""
-
     def func_wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
         new_res = []
@@ -376,9 +375,10 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 
 
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
-                            n_group=2, max_iter=200, max_nogain_streak=10, tol=0.01,
-                            min_group_size=5, ks_alpha=0.05,
-                            init="zipf", C=0.1, n_jobs=1,
+                            n_group=2, max_iter=200, max_nogain_streak=10,
+                            min_group_size=5, ks_alpha=0.95,
+                            alpha_update_freq=5, learning_rate = 0.1,
+                            init="zipf", C=0.1,
                             verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users.
     it returns: ((dist_metrics, fit_group, buffer_group), _max_fit_score)
@@ -395,12 +395,16 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
     max_iter: integer, the maximum number of iteration for learning
 
-    tol: float, tolerance for incremental gain in fit score
-
     min_group_size: integer, the minimum number of members for a group
 
-    ks_alpha: alpha value for ks-test
+    ks_alpha: the initial alpha value for ks-test
         H0: distr.(conencted users) >= distr.(disconnected users)
+
+    alpha_update_freq: integer
+        update ks_alpha for every no-improving iterations of size sepcified by alpha_update_freq
+
+    learning_rate: float [0, 1]
+        change ks_alpha = ks_alpha - learing_rate * ks_alpha at each update
 
     init: character, {'even', 'zipf')
 
@@ -497,6 +501,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         if verbose:
             msg = "-- {}th iteration's fit score: {:.4f}\n".format(_iterate_counter, fit_score)
+            msg += "-- ks-alpha: {:.3f}\n".format(ks_alpha)
             msg += "-- time cost: {:.0f} seconds\n".format(loop_duration)
             msg += "-- size of buffer group: {}\n".format(len(buffer_group))
             print(msg)
@@ -519,13 +524,12 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         _iterate_counter += 1
 
-        if _nogain_streak % 5 == 0:
+        if _nogain_streak % alpha_update_freq == 0 and _nogain_streak != 0:
             # reduce ks_alpha at every 5 non-increment gain
-            ks_alpha -= ks_alpha * 0.1
+            ks_alpha -= ks_alpha * learning_rate
 
         if _nogain_streak >= max_nogain_streak:
             break
-
 
     if is_debug:
         debug_info = {"timers": timers,
