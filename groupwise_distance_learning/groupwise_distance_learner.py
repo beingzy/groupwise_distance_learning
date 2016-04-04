@@ -526,7 +526,11 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         if _nogain_streak % alpha_update_freq == 0 and _nogain_streak != 0:
             # reduce ks_alpha at every 5 non-increment gain
-            ks_alpha -= ks_alpha * learning_rate
+            new_ks_alpha = ks_alpha - ks_alpha * learning_rate
+            if new_ks_alpha < 0.01:
+                ks_alpha = 0.01
+            else:
+                ks_alpha = new_ks_alpha
 
         if _nogain_streak >= max_nogain_streak:
             break
