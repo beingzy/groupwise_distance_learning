@@ -578,13 +578,12 @@ class GroupwiseDistLearner(object):
     """
 
     def __init__(self, n_group=2, max_iter=200, max_nogain_streak=10,
-                 tol=0.01, min_group_size=5, ks_alpha=0.05,
+                 min_group_size=5, ks_alpha=0.05,
                  init="even", C=0.01, verbose=False,
                  is_debug=False, random_state=None):
         self._n_group = n_group
         self._max_iter = max_iter
         self._max_nogain_streak = max_nogain_streak
-        self._tol = tol
         self._min_group_size = min_group_size
         self._ks_alpha = ks_alpha
         self._init = init
@@ -603,7 +602,7 @@ class GroupwiseDistLearner(object):
 
         res = groupwise_dist_learning(user_ids, user_profiles, user_connections,
                                       n_group=self._n_group, max_iter=self._max_iter,
-                                      max_nogain_streak=self._max_nogain_streak, tol=self._tol,
+                                      max_nogain_streak=self._max_nogain_streak,
                                       min_group_size=self._min_group_size, ks_alpha=self._ks_alpha,
                                       init=self._init, C=self._C, verbose=self._verbose, is_debug=self._is_debug,
                                       random_state=self._random_state)
