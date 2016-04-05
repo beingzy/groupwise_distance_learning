@@ -469,7 +469,11 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
         for drawed_user_id in draws:
             user_ids_copy.remove(drawed_user_id)
 
+    # create container to collect information to
+    # track learning process
     if is_debug:
+        iter_hist = []
+        ks_alpha_hist = []
         fs_hist = []
         knowledge_pkgs = []
         timers = []
@@ -478,7 +482,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     _nogain_streak = 0
     _iterate_counter = 0
     _max_fit_score = 0
-
+    # output package
     best_knowledge_pack = None
 
     for ii in range(max_iter):
@@ -516,6 +520,8 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
             _nogain_streak += 1
 
         if is_debug:
+            iter_hist.append(ii)
+            ks_alpha_hist.append(ks_alpha)
             timers.append(loop_duration)
             fs_hist.append(fit_score)
             knowledge_pkgs.append(knowledge_pack)
@@ -534,9 +540,13 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
             break
 
     if is_debug:
-        debug_info = {"timers": timers,
-                      "fs_hist": fs_hist,
-                      "knowledge_pkgs": knowledge_pkgs}
+        track_pack = DataFrame({
+            "iter_hist": iter_hist,
+            "ks_alpha_hist": ks_alpha_hist,
+            "timers": timers,
+            "fs_hist": fs_hist,
+        })
+        debug_info = track_pack, knowledge_pkgs
         return best_knowledge_pack, _max_fit_score, debug_info
     else:
         return best_knowledge_pack, _max_fit_score
