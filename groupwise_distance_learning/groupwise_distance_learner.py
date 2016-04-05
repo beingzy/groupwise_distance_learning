@@ -74,10 +74,7 @@ def _validate_user_information(user_ids, user_profiles, user_connections):
 def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
                            min_group_size=5, random_state=None):
     """ learning gruopwise distnace metrics """
-    nfeat = user_profiles.shape[1]
-    # restore user_profiles to DataFrame including
-    user_profile_df = DataFrame(user_profiles)
-    user_profile_df["ID"] = user_ids
+    n_feat = user_profiles.shape[1]
     # create data container
     new_dist_metrics = dist_metrics.copy()
 
@@ -85,12 +82,12 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
         # ldm() optimized distance metrics - weights
         # for selected users
         if len(gg_user_ids) > min_group_size:
-            single_dist_weights = ldm_train_with_list(gg_user_ids, user_profile_df, user_connections)
+            single_dist_weights = ldm_train_with_list(gg_user_ids, user_ids, user_profiles, user_connections)
             new_dist_metrics[gg] = single_dist_weights
         else:
             if not gg in new_dist_metrics:
                 # intialize default distance metrics weights
-                new_dist_metrics[gg] = [1] * nfeat
+                new_dist_metrics[gg] = [1] * n_feat
     return new_dist_metrics
 
 
@@ -124,10 +121,6 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
     fit_group = _convert_array_to_list(fit_group)
     fit_pvals = _convert_array_to_list(fit_pvals)
 
-    # restore user_profiles to DataFrame including
-    user_profile_df = DataFrame(user_profiles)
-    user_profile_df["ID"] = user_ids
-
     user_graph = Graph()
     user_graph.add_edges_from(user_connections)
 
@@ -139,7 +132,7 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
         gg_dist = dist_matrics[gg]
 
         for ii, ii_user_id in enumerate(gg_user_ids):
-            sim_dist, diff_dist = user_grouped_dist(ii_user_id, gg_dist, user_profile_df, user_graph)
+            sim_dist, diff_dist = user_grouped_dist(ii_user_id, gg_dist, user_ids, user_profiles,  user_graph)
             ii_pval = user_dist_kstest(sim_dist, diff_dist)
 
             if ii_pval < ks_alpha:
@@ -169,9 +162,6 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
     """
     # to keep API consistant
     # restore user_profiles to DataFrame including
-    user_profile_df = DataFrame(user_profiles)
-    user_profile_df["ID"] = user_ids
-
     user_graph = Graph()
     user_graph.add_edges_from(user_connections)
 
@@ -179,7 +169,7 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
     if len(buffer_group_copy) > 0:
         for ii, ii_user_id in enumerate(buffer_group_copy):
             ii_new_group, ii_new_pval = find_fit_group(ii_user_id, dist_metrics,
-                                                       user_profile_df, user_graph, ks_alpha,
+                                                       user_ids, user_profiles, user_graph, ks_alpha,
                                                        current_group=None, fit_rayleigh=False)
             if not ii_new_group is None:
                 # remove member with fit from buffer_group
@@ -200,9 +190,6 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
     """
     # to keep API consistant
     # restore user_profiles to DataFrame including
-    user_profile_df = DataFrame(user_profiles)
-    user_profile_df["ID"] = user_ids
-
     user_graph = Graph()
     user_graph.add_edges_from(user_connections)
 
@@ -215,7 +202,7 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
 
         for ii, ii_user_id in enumerate(gg_user_ids):
             ii_new_group, ii_new_pval = find_fit_group(ii_user_id, cross_group_dist_metrics,
-                                                       user_profile_df, user_graph, ks_alpha,
+                                                       user_ids, user_profiles, user_graph, ks_alpha,
                                                        current_group=None, fit_rayleigh=False)
             # redistribute the user based on fit-tests
             if not ii_new_group is None:
