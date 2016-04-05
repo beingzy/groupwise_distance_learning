@@ -38,7 +38,7 @@ def zipf(n, s=1):
     return [zipf_pdf(k, n, s) for k in range(1, n+1)]
 
 
-def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
+def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
     """ return vector of weighted distance of a user vs. user's conencted users,
     and a vector of weighted distnces of a user vs. user's non-connected users.
 
@@ -55,7 +55,7 @@ def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
     # * weights: <vector-like>, a vector of weights per user profile feature
     # * user_ids: <list> a list of user_ids
     # * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
-    # * user_connections: <matrix-like, array>, a matrix of user connections
+    # * friend_ls: <list>, a list of user ids
     # * user_graph: <networkx.Graph>
 
     Returns:
@@ -69,23 +69,26 @@ def user_grouped_dist(user_id, weights, profile_df, friend_networkx):
     user_dist = user_grouped_dist(weights = learned_weights, user_id, user_ids,
         user_profiles, user_graph)
     """
-    cols = [col for col in profile_df.columns if col is not "ID"]
-    # get the user profile information of the target users
-    user_profile = profile_df.ix[profile_df.ID == user_id, cols].as_matrix()
+
     # get the user_id of friends of the target user
-    friends_ls = friend_networkx.neighbors(user_id)
-    all_ids = profile_df["ID"]
-    non_friends_ls = [u for u in all_ids if u not in friends_ls + [user_id]]
+    friend_ls = user_graph.neighbors(user_id)
+    non_friends_ls = [u for u in user_ids if u not in friend_ls + [user_id]]
+
+    # retrive target user's profile
+    idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
+    user_profile = user_profiles[idx, :]
 
     sim_dist_vec = []
-    for f_id in friends_ls:
-        friend_profile = profile_df.ix[profile_df["ID"] == f_id, cols].as_matrix()
+    for f_id in friend_ls:
+        idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
+        friend_profile = user_profiles[idx, :]
         the_dist = weighted_euclidean(user_profile, friend_profile, weights)
         sim_dist_vec.append(the_dist)
 
     diff_dist_vec = []
     for nf_id in non_friends_ls:
-        non_friend_profile = profile_df.ix[profile_df.ID == nf_id, cols].as_matrix()
+        idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
+        non_friend_profile = user_profiles[idx, :]
         the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
         diff_dist_vec.append(the_dist)
 
