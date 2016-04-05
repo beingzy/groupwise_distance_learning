@@ -138,7 +138,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
         best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=2,
-                                            max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
+                                            max_iter=20, max_nogain_streak=5, min_group_size=1, ks_alpha=0.1,
                                             init='zipf', verbose=True, C=0.1)
 
         knowledge_pack, best_score = best_pack
@@ -155,7 +155,7 @@ class TestGroupWiseDistLearnerRun(unittest.TestCase):
         user_ids, user_profiles, user_connections = load_sample_test_data()
 
         best_pack = groupwise_dist_learning(user_ids, user_profiles, user_connections, n_group=1,
-                                            max_iter=20, max_nogain_streak=5, tol=0.01, min_group_size=1, ks_alpha=0.1,
+                                            max_iter=20, max_nogain_streak=5, min_group_size=1, ks_alpha=0.1,
                                             init='zipf', verbose=True, C=0.1)
 
         knowledge_pack, best_score = best_pack
