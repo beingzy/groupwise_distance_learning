@@ -31,7 +31,7 @@ learned_fit_groups, learned_buffer_group = gwd_learner.get_user_cluster()
 
 #### How to track the learning process
 1. `GroupwiseDistLearner` class provide method to return information generated in the process of learning, if `is_debug = True` is assigned.
-```
+```python
 # define learner
 gwd_learner = GroupwiseDistLearner(n_group=2, max_iter=100, max_nogain_streak=10, 
                                    alpha_update_freq=2,
