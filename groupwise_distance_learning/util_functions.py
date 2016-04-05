@@ -201,8 +201,8 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
     pvals = []
 
     for uid in user_ids:
-        res_dists = user_grouped_dist(uid, weights, user_ids, user_profiles, user_graph)
-        pval = user_dist_kstest(res_dists[0], res_dists[1], fit_rayleigh, _n)
+        sim_dist, diff_dist = user_grouped_dist(uid, weights, user_ids, user_profiles, user_graph)
+        pval = user_dist_kstest(sim_dist, diff_dist, fit_rayleigh, _n)
         pvals.append(pval)
 
     sorted_id_pval = sorted(zip(user_ids, pvals), key=lambda x: x[1])
