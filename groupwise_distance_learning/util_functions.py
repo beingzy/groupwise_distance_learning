@@ -255,9 +255,9 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
     return weight_vec
 
 
-def find_fit_group(uid, dist_metrics, profile_df,
-                   friend_networkx, threshold=0.5,
-                   current_group=None, fit_rayleigh=False, _n=1000):
+def find_fit_group(uid, dist_metrics,
+                   user_ids, user_profiles, user_graph,
+                   threshold=0.5, current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
         each group
 
@@ -290,10 +290,11 @@ def find_fit_group(uid, dist_metrics, profile_df,
             # loop through all distance metrics and calculate
             # p-value of ks-tests by applying it to the user
             # relationships
-            sdist, ddist = user_grouped_dist(user_id=uid, weights=dist, profile_df=profile_df,
-                                             friend_networkx=friend_networkx)
+            sim_dist, diff_dist = user_grouped_dist(user_id=uid, weights=dist,
+                                             user_ids=user_ids, user_profiles=user_profiles,
+                                             user_graph=user_graph)
 
-            pval = user_dist_kstest(sim_dist_vec=sdist, diff_dist_vec=ddist,
+            pval = user_dist_kstest(sim_dist_vec=sim_dist, diff_dist_vec=diff_dist,
                                     fit_rayleigh=fit_rayleigh, _n=_n)
 
             pvals.append(pval)
@@ -313,4 +314,4 @@ def find_fit_group(uid, dist_metrics, profile_df,
         best_group = None
         max_pval = None
 
-    return (best_group, max_pval)
+    return best_group, max_pval
