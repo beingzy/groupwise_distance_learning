@@ -222,7 +222,7 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
     return id_retain, id_mutate
 
 
-def ldm_train_with_list(users_list, profile_df, friends, retain_type=1):
+def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, retain_type=1):
     """ learning distance matrics with ldm() instance, provided with selected
         list of users.
 
@@ -245,12 +245,12 @@ def ldm_train_with_list(users_list, profile_df, friends, retain_type=1):
     new_dist_metrics = ldm_train_with_list(user_list, profile_df, friends_df)
     """
     if retain_type == 0:
-        friends = [(a, b) for a, b in friends if a in users_list or b in users_list]
+        friends = [(a, b) for a, b in user_connections if a in users_list or b in users_list]
     else:
-        friends = [(a, b) for a, b in friends if a in users_list and b in users_list]
+        friends = [(a, b) for a, b in user_connections if a in users_list and b in users_list]
 
     ldm = LDM()
-    ldm.fit(profile_df, friends)
+    ldm.fit(user_ids=user_ids, X=user_profiles, S=friends)
     weight_vec = ldm.get_transform_matrix()
     return weight_vec
 
