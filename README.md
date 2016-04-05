@@ -27,3 +27,19 @@ learned_dist_metrics = gwd_learner.get_groupwise_weights()
 #    they will be treated with generic unweighted diteance metrics 
 learned_fit_groups, learned_buffer_group = gwd_learner.get_user_cluster()
 ```
+
+
+#### How to track the learning process
+1. `GroupwiseDistLearner` class provide method to return information generated in the process of learning, if `is_debug = True` is assigned.
+```
+# define learner
+gwd_learner = GroupwiseDistLearner(n_group=2, max_iter=100, max_nogain_streak=10, 
+                                   alpha_update_freq=2,
+                                   is_debug=True, verbose=True, 
+                                   C=0.5)
+
+# load social network information and execute learning process                              
+gwd_learner.fit(user_ids, user_profile_df, user_connections)
+# retrive debug information                                  
+track_df, knowledge_pkg = gwd_learner.get_debug_info()
+```
