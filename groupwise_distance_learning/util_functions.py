@@ -92,8 +92,7 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
         the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
         diff_dist_vec.append(the_dist)
 
-    res = [sim_dist_vec, diff_dist_vec]
-    return res
+    return sim_dist_vec, diff_dist_vec
 
 
 def user_dist_kstest(sim_dist_vec, diff_dist_vec,
@@ -146,10 +145,9 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
     return pval
 
 
-def users_filter_by_weights(weights, profile_df, friends_networkx,
+def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
                             pval_threshold=0.5,
                             mutate_rate=0.4,
-                            users_list=None,
                             fit_rayleigh=False,
                             _n=1000):
     """ Split users into two groups, "keep" and "mutate", with respect to
@@ -162,10 +160,9 @@ def users_filter_by_weights(weights, profile_df, friends_networkx,
     ----------
     weights: {vector-like, float}, the vector of feature weights which
         is extracted by LDM().fit(x, y).get_transform_matrix()
-    users_list: {vector-like, integer}, the list of user id
-    profile_df: {matrix-like, pandas.DataFrame}, user profile dataframe
-        with columns: ["ID", "x0" - "xn"]
-    friends_networkx: {networkx.Graph()}, Graph() object from Networkx to store
+    user_ids: {list} all user ids following same order of user_profiles
+    user_profiles: {numpy.array, matrix-like}
+    user_graph: {networkx.Graph()}, Graph() object from Networkx to store
         the relationships information
     pval_threshold: {float}, the threshold for p-value to reject hypothesis
     min_friend_cnt: {integer}, drop users whose total of friends is less than
@@ -199,18 +196,16 @@ def users_filter_by_weights(weights, profile_df, friends_networkx,
     min_friend_cnt is not implemented
     """
     # all_users_ids = list(set(profile_df.ID))
-    # users_list
+    # user_ids
     # container for users meeting different critiria
     pvals = []
-    if users_list is None:
-        users_list = list(profile_df.ix[:, 0])
 
-    for uid in users_list:
-        res_dists = user_grouped_dist(uid, weights, profile_df, friends_networkx)
+    for uid in user_ids:
+        res_dists = user_grouped_dist(uid, weights, user_ids, user_profiles, user_graph)
         pval = user_dist_kstest(res_dists[0], res_dists[1], fit_rayleigh, _n)
         pvals.append(pval)
 
-    sorted_id_pval = sorted(zip(users_list, pvals), key=lambda x: x[1])
+    sorted_id_pval = sorted(zip(user_ids, pvals), key=lambda x: x[1])
 
     good_fits = [i for i, p in sorted_id_pval if p >= pval_threshold]
     bad_fits = [i for i, p in sorted_id_pval if p < pval_threshold]
@@ -224,9 +219,7 @@ def users_filter_by_weights(weights, profile_df, friends_networkx,
         id_retain = good_fits
         id_mutate = bad_fits
 
-    res = [id_retain, id_mutate]
-
-    return res
+    return id_retain, id_mutate
 
 
 def ldm_train_with_list(users_list, profile_df, friends, retain_type=1):
