@@ -2,7 +2,6 @@
 Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/MM/DD
 """
-from datetime import datetime
 import numpy as np
 from numpy.random import choice
 from pandas import DataFrame
@@ -11,10 +10,8 @@ from math import floor
 from datetime import datetime
 from copy import deepcopy
 
-from groupwise_distance_learning.kstest import kstest_2samp_greater
 from groupwise_distance_learning.util_functions import user_grouped_dist
 from groupwise_distance_learning.util_functions import user_dist_kstest
-from groupwise_distance_learning.util_functions import users_filter_by_weights
 from groupwise_distance_learning.util_functions import ldm_train_with_list
 from groupwise_distance_learning.util_functions import find_fit_group
 from groupwise_distance_learning.util_functions import zipf
