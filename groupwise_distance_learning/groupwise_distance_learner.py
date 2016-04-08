@@ -71,7 +71,7 @@ def _validate_user_information(user_ids, user_profiles, user_connections):
         raise ValueError("strange users are found in user_connections!")
 
 
-def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
+def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_graph,
                            min_group_size=5, random_state=None):
     """ learning gruopwise distnace metrics """
     n_feat = user_profiles.shape[1]
@@ -82,7 +82,7 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
         # ldm() optimized distance metrics - weights
         # for selected users
         if len(gg_user_ids) > min_group_size:
-            single_dist_weights = ldm_train_with_list(gg_user_ids, user_ids, user_profiles, user_connections)
+            single_dist_weights = ldm_train_with_list(gg_user_ids, user_ids, user_profiles, user_graph)
             new_dist_metrics[gg] = single_dist_weights
         else:
             if not gg in new_dist_metrics:
