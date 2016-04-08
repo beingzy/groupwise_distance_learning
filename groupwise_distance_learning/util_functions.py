@@ -222,16 +222,17 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
     return id_retain, id_mutate
 
 
-def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, retain_type=1):
+def ldm_train_with_list(users_list, user_ids, user_profiles, user_graph):
     """ learning distance matrics with ldm() instance, provided with selected
         list of users.
 
     Parameters:
     -----------
     users_list: {vector-like, integer}, the list of user id
-    profile_df: {matrix-like, pandas.DataFrame}, user profile dataframe
-        with columns: ["ID", "x0" - "xn"]
-    friends: {list of tuple}, each tuple keeps a pair of user id
+    user_ids: {vectork-like, list or numpy.ndarray}, all user_ids correponds for rows in user_profiles
+    user_profiles: {matrix-like, numpy.ndarray}, user profiles
+    user_graph: {networkx.Graph} user social networks
+
     retain_type: {integer}, 0, adopting 'or' logic by keeping relationship in
         friends_df if either of entities is in user_list 1, adopting 'and'
         logic
@@ -244,15 +245,14 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
     ---------
     new_dist_metrics = ldm_train_with_list(user_list, profile_df, friends_df)
     """
-    if retain_type == 0:
-        friends = [(a, b) for a, b in user_connections if a in users_list or b in users_list]
-    else:
-        friends = [(a, b) for a, b in user_connections if a in users_list and b in users_list]
+    friends = []
+    for target_uid in users_list:
+        target_connections = [(target_uid, uid) for uid in user_graph.neighbors(target_uid)]
+        friends.extend(target_connections)
 
     ldm = LDM()
     ldm.fit(user_ids=user_ids, X=user_profiles, S=friends)
-    weight_vec = ldm.get_transform_matrix()
-    return weight_vec
+    return ldm.get_transform_matrix()
 
 
 def find_fit_group(uid, dist_metrics,
