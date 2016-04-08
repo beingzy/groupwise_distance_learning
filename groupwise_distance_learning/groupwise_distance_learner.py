@@ -181,13 +181,9 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
 
 
 def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals, unfit_group, buffer_group,
-                                              user_ids, user_profiles, user_connections, ks_alpha=0.05):
+                                              user_ids, user_profiles, user_graph, ks_alpha=0.05):
     """ update members in unfit_group with cross-group distance. unfit members are kept in buffer_group
     """
-    # to keep API consistant
-    # restore user_profiles to DataFrame including
-    user_graph = Graph()
-    user_graph.add_edges_from(user_connections)
 
     unfit_group_copy = unfit_group.copy()
     for gg, gg_user_ids in unfit_group_copy.items():
