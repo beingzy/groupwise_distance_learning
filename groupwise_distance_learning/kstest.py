@@ -20,6 +20,8 @@ rstats = importr("stats")
 def kstest_2samp_greater(x, y):
     """ return tests staticics and p-value for KS-tests
     which compare two samples.
+    IF either x or y has too few elements, the test will
+    return None as test statistics, 1 as pvalue.
 
     Hypothesis:
     H0: distribution of X >= distribution of Y
@@ -43,13 +45,17 @@ def kstest_2samp_greater(x, y):
     x = x.ravel()
     y = y.ravel()
 
-    x_size = len(x)
-    if len(y) > x_size:
-        y = choice(y, size=x_size, replace=False)
+    try:
+        x_size = len(x)
+        if len(y) > x_size:
+            y = choice(y, size=x_size, replace=False)
 
-    setting = array(["less"], dtype="str")
-    test_res = rstats.ks_test(x, y, alternative=setting)
-    ts, pval = test_res[0][0], test_res[1][0]
+        setting = array(["less"], dtype="str")
+        test_res = rstats.ks_test(x, y, alternative=setting)
+        ts, pval = test_res[0][0], test_res[1][0]
+    except:
+        ts, pval = None, 1
+
     return ts, pval
 
 # def kstest_2samp_greater(data1, data2):
