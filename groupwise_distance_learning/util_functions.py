@@ -64,8 +64,8 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connection
     * weights: {vector-like, float}, the vector of feature weights which
         is extracted by LDM().fit(x, y).get_transform_matrix()
     * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
-    * friend_connections: {list } a list of user id pairs representing connections
-        to store the relationships informat
+    * user_connections: {list } a list of user id pairs representing connections
+        to store the relationships
 
     Returns:
     -------
@@ -159,7 +159,8 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
     return pval
 
 
-def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
+def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
+                            is_directed=False,
                             pval_threshold=0.5,
                             mutate_rate=0.4,
                             fit_rayleigh=False,
@@ -176,8 +177,11 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
         is extracted by LDM().fit(x, y).get_transform_matrix()
     user_ids: {list} all user ids following same order of user_profiles
     user_profiles: {numpy.array, matrix-like}
-    user_graph: {networkx.Graph()}, Graph() object from Networkx to store
+    user_connecions: {networkx.Graph()}, Graph() object from Networkx to store
         the relationships information
+    is_directed: {boolean, default=False}
+        False: consider user_connections as undirected graph
+        True: as directed graph
     pval_threshold: {float}, the threshold for p-value to reject hypothesis
     min_friend_cnt: {integer}, drop users whose total of friends is less than
        this minimum count
@@ -215,7 +219,9 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_graph,
     pvals = []
 
     for uid in user_ids:
-        sim_dist, diff_dist = user_grouped_dist(uid, weights, user_ids, user_profiles, user_graph)
+        sim_dist, diff_dist = user_grouped_dist(uid, weights,
+                                                user_ids, user_profiles, user_connections,
+                                                is_directed)
         pval = user_dist_kstest(sim_dist, diff_dist, fit_rayleigh, _n)
         pvals.append(pval)
 
@@ -243,9 +249,10 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
     Parameters:
     -----------
     users_list: {vector-like, integer}, the list of user id
-    profile_df: {matrix-like, pandas.DataFrame}, user profile dataframe
-        with columns: ["ID", "x0" - "xn"]
-    friends: {list of tuple}, each tuple keeps a pair of user id
+    user_ids: {list} all user ids following same order of user_profiles
+    user_profiles: {numpy.array, matrix-like}
+    user_connecions: {networkx.Graph()}, Graph() object from Networkx to store
+        the relationships information
     retain_type: {integer}, 0, adopting 'or' logic by keeping relationship in
         friends_df if either of entities is in user_list 1, adopting 'and'
         logic
@@ -270,7 +277,7 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
 
 
 def find_fit_group(uid, dist_metrics,
-                   user_ids, user_profiles, user_graph,
+                   user_ids, user_profiles, user_connections, is_directed=False,
                    threshold=0.5, current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
         each group
@@ -279,8 +286,13 @@ def find_fit_group(uid, dist_metrics,
     ----------
     uid: {integer}, user id
     dist_metrics: {dictionary}, all {index: distance_metrics}
-    profile_df: {DataFrame}, user profile includes "ID" column
-    friend_networkx: {networkx.Graph}, user relationships
+    user_ids: {list} all user ids following same order of user_profiles
+    user_profiles: {numpy.array, matrix-like}
+    user_connecions: {networkx.Graph()}, Graph() object from Networkx to store
+        the relationships information
+    is_directed: {boolean, default=False}
+        False: consider user_connections as undirected graph
+        True: as directed graph
     threshold: {float}, threshold for qualifying pvalue of ks-tests
     current_group: {integer}, group index
     fit_rayleigh: {boolean}
@@ -305,8 +317,9 @@ def find_fit_group(uid, dist_metrics,
             # p-value of ks-tests by applying it to the user
             # relationships
             sim_dist, diff_dist = user_grouped_dist(user_id=uid, weights=dist,
-                                             user_ids=user_ids, user_profiles=user_profiles,
-                                             user_graph=user_graph)
+                                                    user_ids=user_ids, user_profiles=user_profiles,
+                                                    user_connections=user_connections,
+                                                    is_directed=is_directed)
 
             pval = user_dist_kstest(sim_dist_vec=sim_dist, diff_dist_vec=diff_dist,
                                     fit_rayleigh=fit_rayleigh, _n=_n)
