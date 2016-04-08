@@ -95,7 +95,7 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
 
 def _update_fit_group_with_groupwise_dist(dist_matrics,
                                           fit_group, fit_pvals,
-                                          user_ids, user_profiles, user_connections,
+                                          user_ids, user_profiles, user_graph,
                                           ks_alpha=0.05):
     """ return fit_group, fit_pvals, unfit_group by updating members in fit_group
     with distance metrics unfit member will be sent to unfit group.
@@ -122,9 +122,6 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
 
     fit_group = _convert_array_to_list(fit_group)
     fit_pvals = _convert_array_to_list(fit_pvals)
-
-    user_graph = Graph()
-    user_graph.add_edges_from(user_connections)
 
     # create container
     fit_group_copy = fit_group.copy()
