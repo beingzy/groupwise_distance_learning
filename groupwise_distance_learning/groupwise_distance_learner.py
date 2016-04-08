@@ -155,15 +155,12 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
 
 
 def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
-                         user_ids, user_profiles, user_connections, ks_alpha=0.05):
+                         user_ids, user_profiles, user_graph, ks_alpha=0.05):
     """ return fit_group, fit_pvals, buffer_group
         redistribute member in buffer group into fit_group if fit had been found
     """
     # to keep API consistant
     # restore user_profiles to DataFrame including
-    user_graph = Graph()
-    user_graph.add_edges_from(user_connections)
-
     buffer_group_copy = buffer_group.copy()
     if len(buffer_group_copy) > 0:
         for ii, ii_user_id in enumerate(buffer_group_copy):
