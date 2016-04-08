@@ -250,7 +250,7 @@ def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
 
 
 def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
-                                        user_ids, user_profiles, user_connections,
+                                        user_ids, user_profiles, user_graph,
                                         ks_alpha=0.05, min_group_size=5, verbose=False,
                                         random_state=None):
     """ a single run of groupwise distance learning
@@ -306,7 +306,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 
     start_time = datetime.now()
     # step 00: learn distance metriccs
-    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
+    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_graph,
                                           min_group_size)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -317,7 +317,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     # newly learned distance metrics weights
     start_time = datetime.now()
     fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
-                                                                              user_ids, user_profiles, user_connections,
+                                                                              user_ids, user_profiles, user_graph,
                                                                               ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -328,7 +328,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     # fit with other distance metrics
     start_time = datetime.now()
     fit_group, fit_pvals, buffer_group = _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
-                                                              user_ids, user_profiles, user_connections, ks_alpha)
+                                                              user_ids, user_profiles, user_graph, ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -339,7 +339,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     fit_group, fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals,
                                                                                    unfit_group, buffer_group,
                                                                                    user_ids, user_profiles,
-                                                                                   user_connections, ks_alpha)
+                                                                                   user_graph, ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
