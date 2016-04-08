@@ -47,16 +47,9 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
     * user_id: {integer}, the target user's ID
     * weights: {vector-like, float}, the vector of feature weights which
         is extracted by LDM().fit(x, y).get_transform_matrix()
-    * profile_df: {matrix-like, pandas.DataFrame}, user profile dataframe
-        with columns: ["ID", "x0" - "xn"]
-    * friend_networkx: {networkx.Graph()}, Graph() object from Networkx
-        to store the relationships informat
-    # -- new interface --
-    # * weights: <vector-like>, a vector of weights per user profile feature
-    # * user_ids: <list> a list of user_ids
-    # * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
-    # * friend_ls: <list>, a list of user ids
-    # * user_graph: <networkx.Graph>
+    * user_ids: {vector-like} list of user ids
+    * user_profiles: {matrix-like, pandas.DataFrame}, user profiles
+    * user_graph: {networkx.Graph()}, store the relationships information
 
     Returns:
     -------
