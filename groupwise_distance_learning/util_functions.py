@@ -38,7 +38,18 @@ def zipf(n, s=1):
     return [zipf_pdf(k, n, s) for k in range(1, n+1)]
 
 
-def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
+def get_user_friends(targert_user_id, user_connections, is_directed=False):
+    """ return a list of user_ids representing users connected with target users
+    """
+    if is_directed:
+        conn_user_ids = [b_uid for a_uid, b_uid in user_connections if a_uid == targert_user_id]
+    else:
+        conn_user_ids = [b_uid for a_uid, b_uid in user_connections \
+                         if a_uid == targert_user_id or b_uid == targert_user_id]
+    return conn_user_ids
+
+
+def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connections, is_directed=False):
     """ return vector of weighted distance of a user vs. user's conencted users,
     and a vector of weighted distnces of a user vs. user's non-connected users.
 
@@ -47,16 +58,9 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
     * user_id: {integer}, the target user's ID
     * weights: {vector-like, float}, the vector of feature weights which
         is extracted by LDM().fit(x, y).get_transform_matrix()
-    * profile_df: {matrix-like, pandas.DataFrame}, user profile dataframe
-        with columns: ["ID", "x0" - "xn"]
-    * friend_networkx: {networkx.Graph()}, Graph() object from Networkx
+    * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
+    * friend_connections: {list } a list of user id pairs representing connections
         to store the relationships informat
-    # -- new interface --
-    # * weights: <vector-like>, a vector of weights per user profile feature
-    # * user_ids: <list> a list of user_ids
-    # * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
-    # * friend_ls: <list>, a list of user ids
-    # * user_graph: <networkx.Graph>
 
     Returns:
     -------
@@ -74,7 +78,7 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
     gd_wrapper.load_weights(weights)
 
     # get the user_id of friends of the target user
-    friend_ls = user_graph.neighbors(user_id)
+    friend_ls = get_user_friends(user_id, user_connections, is_directed)
     non_friends_ls = [u for u in user_ids if u not in friend_ls + [user_id]]
 
     # retrive target user's profile
