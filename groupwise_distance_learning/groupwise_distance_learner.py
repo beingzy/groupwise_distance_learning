@@ -567,6 +567,7 @@ class GroupwiseDistLearner(object):
                  ks_alpha=0.95, alpha_update_freq = 5, learning_rate = 0.1,
                  C=0.1, init="zipf", verbose=False,
                  is_debug=False, random_state=None):
+
         self._n_group = n_group
         self._max_iter = max_iter
         self._max_nogain_streak = max_nogain_streak
@@ -586,9 +587,9 @@ class GroupwiseDistLearner(object):
         self._score = None
         self._debug_info = None
 
-    def fit(self, user_ids, user_profiles, user_connections):
+    def fit(self, user_ids, user_profiles, user_graph):
 
-        res = groupwise_dist_learning(user_ids, user_profiles, user_connections,
+        res = groupwise_dist_learning(user_ids, user_profiles, user_graph,
                                       n_group=self._n_group, max_iter=self._max_iter,
                                       max_nogain_streak=self._max_nogain_streak,
                                       min_group_size=self._min_group_size,
