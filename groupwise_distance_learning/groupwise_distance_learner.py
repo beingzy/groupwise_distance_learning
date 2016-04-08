@@ -348,7 +348,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     return dist_metrics, fit_group, fit_pvals, buffer_group
 
 
-def groupwise_dist_learning(user_ids, user_profiles, user_connections,
+def groupwise_dist_learning(user_ids, user_profiles, user_graph,
                             n_group=2, max_iter=200, max_nogain_streak=10,
                             min_group_size=5, ks_alpha=0.95,
                             alpha_update_freq=5, learning_rate = 0.1,
@@ -393,7 +393,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
     """
 
-    _validate_user_information(user_ids, user_profiles, user_connections)
+    _validate_user_information(user_ids, user_profiles, user_graph)
 
     if max_iter < 0:
         msg = "Invalid number of initilizations n_group (={}) must be bigger than zero.".format(max_iter)
@@ -465,7 +465,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
         loop_start_time = datetime.now()
         iter_res = _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
-                                                       user_ids, user_profiles, user_connections,
+                                                       user_ids, user_profiles, user_graph,
                                                        ks_alpha, min_group_size, verbose,
                                                        random_state)
 
