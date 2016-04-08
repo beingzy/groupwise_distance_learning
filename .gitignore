@@ -62,3 +62,6 @@ docs/_build/
 # PyBuilder
 target/
 
+# remove .pycharm's boilerplates
+.idea
+
