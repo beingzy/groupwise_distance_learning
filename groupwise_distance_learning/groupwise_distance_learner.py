@@ -5,6 +5,7 @@ Date: 2016/MM/DD
 import numpy as np
 from numpy.random import choice
 from pandas import DataFrame
+import networkx as nx
 from networkx import Graph
 from math import floor
 from datetime import datetime
@@ -56,12 +57,10 @@ def all_to_list(func):
     return func_wrapper
 
 
-def _validate_user_information(user_ids, user_profiles, user_connections):
+def _validate_user_information(user_ids, user_profiles, user_graph):
     """ validate user-related information
     """
-    a_user_ids = list(set([uid for uid, _ in user_connections]))
-    b_user_ids = list(set([uid for _, uid in user_connections]))
-    uniq_user_ids = list(set(a_user_ids + b_user_ids))
+    uniq_user_ids = user_graph.nodes()
     num_strange_users = len([uid for uid in uniq_user_ids if not uid in user_ids])
 
     if len(user_ids) != user_profiles.shape[0]:
@@ -69,6 +68,9 @@ def _validate_user_information(user_ids, user_profiles, user_connections):
 
     if num_strange_users > 0:
         raise ValueError("strange users are found in user_connections!")
+
+    if not isinstance(user_graph, Graph):
+        raise ValueError("user_graph must be an instance of networkx.Graph!")
 
 
 def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_graph,
