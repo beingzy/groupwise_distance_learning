@@ -7,6 +7,7 @@ import os
 import os.path
 from os.path import dirname, abspath, join
 import pandas as pd
+from networkx import Graph, DiGraph
 
 
 def get_file_parent_dir_path(level=1):
@@ -33,7 +34,10 @@ def load_sample_test_data():
     user_profile_df = int_user_profile_df.drop(["id", "feat_3"], axis=1, inplace=False).as_matrix()
     user_connections_df = user_connections_df.as_matrix()
 
-    return user_ids, user_profile_df, user_connections_df
+    user_graph = Graph()
+    user_graph.add_edges_from(user_connections_df)
+
+    return user_ids, user_profile_df, user_graph
 
 
 def load_simulated_test_data():
@@ -55,7 +59,10 @@ def load_simulated_test_data():
     user_connections_df = (user_connections_df[user_connections_df.isFriend==1]
                        .drop('isFriend', axis=1, inplace=False).astype(int).as_matrix())
 
-    return user_ids, user_profile_df, user_connections_df, user_true_groups
+    user_graph = Graph()
+    user_graph.add_edges_from(user_connections_df)
+
+    return user_ids, user_profile_df, user_graph, user_true_groups
 
 
 
