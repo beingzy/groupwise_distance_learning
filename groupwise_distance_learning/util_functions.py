@@ -44,8 +44,13 @@ def get_user_friends(targert_user_id, user_connections, is_directed=False):
     if is_directed:
         conn_user_ids = [b_uid for a_uid, b_uid in user_connections if a_uid == targert_user_id]
     else:
-        conn_user_ids = [b_uid for a_uid, b_uid in user_connections \
-                         if a_uid == targert_user_id or b_uid == targert_user_id]
+        conn_user_ids = []
+        for a_uid, b_uid in user_connections:
+            if a_uid == targert_user_id:
+                conn_user_ids.append(b_uid)
+            if b_uid == targert_user_id:
+                conn_user_ids.append(a_uid)
+
     return conn_user_ids
 
 
