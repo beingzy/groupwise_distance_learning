@@ -250,7 +250,7 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
         friends = [(a, b) for a, b in user_connections if a in users_list and b in users_list]
 
     ldm = LDM()
-    ldm.fit(user_ids=user_ids, X=user_profiles, S=friends)
+    ldm.fit(user_ids=user_ids, user_profiles=user_profiles, S=friends)
     weight_vec = ldm.get_transform_matrix()
     return weight_vec
 
