@@ -85,14 +85,16 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_graph):
     for f_id in friend_ls:
         idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
         friend_profile = user_profiles[idx, :]
-        the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
+        # the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
+        the_dist = weighted_euclidean(user_profile, friend_profile, weights)
         sim_dist_vec.append(the_dist)
 
     diff_dist_vec = []
     for nf_id in non_friends_ls:
         idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
         non_friend_profile = user_profiles[idx, :]
-        the_dist = gd_wrapper.dist_euclidean(user_profile, non_friend_profile)
+        # the_dist = gd_wrapper.dist_euclidean(user_profile, non_friend_profile)
+        the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
         diff_dist_vec.append(the_dist)
 
     return sim_dist_vec, diff_dist_vec
