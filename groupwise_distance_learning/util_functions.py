@@ -38,6 +38,22 @@ def zipf(n, s=1):
     return [zipf_pdf(k, n, s) for k in range(1, n+1)]
 
 
+def normalize_user_record(a_profile_record, n_feat=None):
+    """ convert an array of single row to list """
+    if isinstance(a_profile_record, np.ndarray):
+
+        if n_feat is None:
+            _, n_feat = a_profile_record.shape
+
+        row_list = a_profile_record.tolist()
+        if len(row_list) < n_feat:
+            row_list = row_list[0]
+        return row_list
+
+    else:
+        return a_profile_record
+
+
 def get_user_friends(targert_user_id, user_connections, is_directed=False):
     """ return a list of user_ids representing users connected with target users
     """
@@ -78,9 +94,12 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connection
     user_dist = user_grouped_dist(weights = learned_weights, user_id, user_ids,
         user_profiles, user_graph)
     """
+    # initiate general distance wrapper to deal with categorical variable
     gd_wrapper = GeneralDistanceWrapper()
     gd_wrapper.fit(user_profiles)
     gd_wrapper.load_weights(weights)
+
+    _, n_feats = user_profiles.shape
 
     # get the user_id of friends of the target user
     friend_ls = get_user_friends(user_id, user_connections, is_directed)
@@ -89,21 +108,22 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connection
     # retrive target user's profile
     idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
     user_profile = user_profiles[idx, :]
+    user_profile = normalize_user_record(user_profile, n_feats)
 
     sim_dist_vec = []
     for f_id in friend_ls:
         idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
-        friend_profile = user_profiles[idx, :]
-        # the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
-        the_dist = weighted_euclidean(user_profile, friend_profile, weights)
+        friend_profile = normalize_user_record(user_profiles[idx, :], n_feats)
+        the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
+        # the_dist = weighted_euclidean(user_profile, friend_profile, weights)
         sim_dist_vec.append(the_dist)
 
     diff_dist_vec = []
     for nf_id in non_friends_ls:
         idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
-        non_friend_profile = user_profiles[idx, :]
-        # the_dist = gd_wrapper.dist_euclidean(user_profile, non_friend_profile)
-        the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
+        non_friend_profile = normalize_user_record(user_profiles[idx, :], n_feats)
+        the_dist = gd_wrapper.dist_euclidean(user_profile, non_friend_profile)
+        # the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
         diff_dist_vec.append(the_dist)
 
     return sim_dist_vec, diff_dist_vec
