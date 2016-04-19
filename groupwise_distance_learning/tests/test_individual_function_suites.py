@@ -72,7 +72,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         # definte test data
         fit_group = {0: ['a', 'b', 'c'], 1: ['d', 'e']}
         fit_pvals = {0: [1, 1, 1], 1: [1, 1]}
-        dist_metrics = {0: [1, 1, 1], 1: [1, 1, 1]}
+        dist_metrics = {0: [1, 1, 1, 1], 1: [1, 1, 1, 1]}
 
         new_fit_group, new_fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics,
                                                                                           fit_group,
@@ -99,7 +99,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         # definte test data
         fit_group = {0: ['a', 'b', 'c'], 1: ['d', 'e']}
         fit_pvals = {0: [1, 1, 1], 1: [1, 1]}
-        new_dist_metrics = {0: [0, 1, 0], 1: [0, 0, 1]}
+        new_dist_metrics = {0: [0, 1, 0, 0], 1: [0, 0, 1, 0]}
 
         new_fit_group, new_fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(new_dist_metrics,
                                                                                           fit_group,
@@ -126,7 +126,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         # definte test data
         fit_group = {0: ['a', 'b', 'c'], 1: ['d', 'e']}
         fit_pvals = {0: [1, 1, 1], 1: [1, 1]}
-        new_dist_metrics = {0: [1, 0, 1], 1: [1, 1, 0]}
+        new_dist_metrics = {0: [1, 0, 1, 1], 1: [1, 1, 0, 1]}
 
         new_fit_group, new_fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(new_dist_metrics,
                                                                                           fit_group,
@@ -153,7 +153,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         # definte test data
         fit_group = {0: ['a', 'b', 'c'], 1: ['d', 'e']}
         fit_pvals = {0: [1, 1, 1], 1: [1, 1]}
-        new_dist_metrics = {0: [1, 0, 1], 1: [1, 1, 0]}
+        new_dist_metrics = {0: [1, 0, 1, 0], 1: [1, 1, 0, 0]}
 
         new_fit_group, new_fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(new_dist_metrics,
                                                                                           fit_group,
@@ -180,7 +180,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         fit_group = {0:[], 1:[]}
         fit_pvals = {0:[], 1:[]}
         buffer_group = user_ids
-        new_dist_metrics = {0: [0, 1, 0], 1: [0, 0, 1]}
+        new_dist_metrics = {0: [0, 1, 0, 0], 1: [0, 0, 1, 0]}
 
         new_fit_group, new_fit_pvals, unfit_group = _update_buffer_group(new_dist_metrics, fit_group, fit_pvals,
                                                                          buffer_group, user_ids, user_profile_df,
@@ -202,7 +202,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         fit_pvals = {0:[], 1:[]}
         unfit_group = {0: ['d', 'e'], 1: ['a', 'b', 'c']}
         buffer_group = []
-        dist_metrics = {0: [0, 1, 0], 1: [0, 0, 1]}
+        dist_metrics = {0: [0, 1, 0, 0], 1: [0, 0, 1, 0]}
 
         new_fit_group, new_fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics,
                                                                                                fit_group,
@@ -237,7 +237,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         fit_pvals = {0:[], 1:[]}
         unfit_group = {0: ['d', 'e'], 1: ['a', 'b', 'c']}
         buffer_group = []
-        dist_metrics = {0: [1, 0, 1], 1: [1, 1, 0]}
+        dist_metrics = {0: [1, 0, 1, 0], 1: [1, 1, 0, 0]}
 
         new_fit_group, new_fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics,
                                                                                                fit_group,
@@ -273,7 +273,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         fit_pvals = {0:[], 1:[]}
         unfit_group = {0: ['d', 'e'], 1: ['a', 'b', 'c']}
         buffer_group = []
-        dist_metrics = {0: [1, 1, 1], 1: [0, 0, 1]}
+        dist_metrics = {0: [1, 1, 1, 0], 1: [0, 0, 1, 0]}
 
         new_fit_group, new_fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics,
                                                                                                fit_group,
@@ -305,7 +305,7 @@ class TestGroupWiseDistLearnerSupportFunctions(unittest.TestCase):
         fit_pvals = {0:[], 1:[], 2:[]}
         unfit_group = {0: ['d', 'e'], 1: ['a', 'b', 'c'], 2:[]}
         buffer_group = []
-        dist_metrics = {0: [1, 1, 1], 1: [0, 0, 1], 2:[0, 1, 0]}
+        dist_metrics = {0: [1, 1, 1, 0], 1: [0, 0, 1, 0], 2:[0, 1, 0, 0]}
 
         new_fit_group, new_fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics,
                                                                                                fit_group,
