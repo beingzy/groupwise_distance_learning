@@ -10,10 +10,10 @@ import scipy as sp
 import pandas as pd
 import networkx as nx
 from matplotlib import pyplot as plt
+import copy
 
 from scipy.stats import rayleigh
-from numpy.random import choice
-from networkx import Graph
+
 
 from learning_dist_metrics.ldm import LDM
 from learning_dist_metrics.dist_metrics import weighted_euclidean
@@ -70,7 +70,24 @@ def get_user_friends(targert_user_id, user_connections, is_directed=False):
     return conn_user_ids
 
 
-def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connections, is_directed=False):
+def gen_users_pair_signature(a, b, is_directed=False):
+    """ generate string to encode user pair"""
+    if is_directed:
+        a, b = str(a), str(b)
+        return "-".join([a, b])
+    else:
+        if a > b:
+            a, b = str(a), str(b)
+            return "-".join([b, a])
+        else:
+            a, b = str(a), str(b)
+            return "-".join([a, b])
+
+
+def user_grouped_dist(user_id, weights,
+                      user_ids, user_profiles, user_connections,
+                      dist_memory,
+                      is_directed=False):
     """ return vector of weighted distance of a user vs. user's conencted users,
     and a vector of weighted distnces of a user vs. user's non-connected users.
 
@@ -82,6 +99,9 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connection
     * user_profile: <matrix-like, array>, a matrix of user profile, sorted by user_ids
     * user_connections: {list } a list of user id pairs representing connections
         to store the relationships
+    * dist_memory: {dictionary} store key ('id-id'): value ('distance')
+    (deprecated: * dist_func: {function} with argument two vector)
+    * is_directed: {boolean} True, directed graph
 
     Returns:
     -------
@@ -106,27 +126,39 @@ def user_grouped_dist(user_id, weights, user_ids, user_profiles, user_connection
     non_friends_ls = [u for u in user_ids if u not in friend_ls + [user_id]]
 
     # retrive target user's profile
-    idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
-    user_profile = user_profiles[idx, :]
+    u_idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
+    user_profile = user_profiles[u_idx, :]
     user_profile = normalize_user_record(user_profile, n_feats)
 
     sim_dist_vec = []
     for f_id in friend_ls:
-        idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
-        friend_profile = normalize_user_record(user_profiles[idx, :], n_feats)
-        the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
-        # the_dist = weighted_euclidean(user_profile, friend_profile, weights)
+        f_idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
+        pair_sign = gen_users_pair_signature(u_idx, f_idx, is_directed)
+        if pair_sign in dist_memory:
+            the_dist = dist_memory[pair_sign]
+        else:
+            friend_profile = normalize_user_record(user_profiles[f_idx, :], n_feats)
+            the_dist = gd_wrapper.dist_euclidean(user_profile, friend_profile)
+            # insert distance of a new pair
+            dist_memory[pair_sign] = the_dist
+        # collect distance with friends
         sim_dist_vec.append(the_dist)
 
     diff_dist_vec = []
     for nf_id in non_friends_ls:
-        idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
-        non_friend_profile = normalize_user_record(user_profiles[idx, :], n_feats)
-        the_dist = gd_wrapper.dist_euclidean(user_profile, non_friend_profile)
-        # the_dist = weighted_euclidean(user_profile, non_friend_profile, weights)
+        nf_idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
+        pair_sign = gen_users_pair_signature(u_idx, nf_idx, is_directed)
+        if pair_sign in dist_memory:
+            the_dist = dist_memory[pair_sign]
+        else:
+            nonfriend_profile = normalize_user_record(user_profiles[nf_idx, :], n_feats)
+            the_dist = gd_wrapper.dist_euclidean(user_profile, nonfriend_profile)
+            # insert distance of a new pair
+            dist_memory[pair_sign] = the_dist
+        # collect distance with friends
         diff_dist_vec.append(the_dist)
 
-    return sim_dist_vec, diff_dist_vec
+    return sim_dist_vec, diff_dist_vec, copy.deepcopy(dist_memory)
 
 
 def user_dist_kstest(sim_dist_vec, diff_dist_vec,
@@ -233,9 +265,6 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
     -----
     min_friend_cnt is not implemented
     """
-    # all_users_ids = list(set(profile_df.ID))
-    # user_ids
-    # container for users meeting different critiria
     pvals = []
 
     for uid in user_ids:
