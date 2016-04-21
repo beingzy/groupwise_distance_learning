@@ -10,6 +10,7 @@ from math import floor
 from datetime import datetime
 from copy import deepcopy
 
+from distance_metrics.GeneralDistanceWrapper import GeneralDistanceWrapper
 from groupwise_distance_learning.util_functions import user_grouped_dist
 from groupwise_distance_learning.util_functions import user_dist_kstest
 from groupwise_distance_learning.util_functions import ldm_train_with_list
@@ -421,6 +422,14 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     fit_pvals = _init_dict_list(n_group)
     buffer_group = []
 
+    # add container store pairwise distance
+    # which will be reset to empty {} when
+    # distance metrics update
+    group_dist_memory = _init_dict_list(n_group)
+    # general distance
+    gd_wrapper = GeneralDistanceWrapper()
+    gd_wrapper.fit(user_profiles)
+
     # initiating the group's composition
     total_users = len(user_ids)
 
@@ -579,6 +588,7 @@ class GroupwiseDistLearner(object):
                  ks_alpha=0.95, alpha_update_freq = 5, learning_rate = 0.1,
                  C=0.1, init="zipf", verbose=False,
                  is_debug=False, random_state=None):
+
         self._n_group = n_group
         self._max_iter = max_iter
         self._max_nogain_streak = max_nogain_streak
@@ -597,6 +607,7 @@ class GroupwiseDistLearner(object):
         self._buffer_group = None
         self._score = None
         self._debug_info = None
+
 
     def fit(self, user_ids, user_profiles, user_connections):
 
