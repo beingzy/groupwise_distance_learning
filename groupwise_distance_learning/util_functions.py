@@ -119,6 +119,9 @@ def user_grouped_dist(user_id, weights,
     gd_wrapper.fit(user_profiles)
     gd_wrapper.load_weights(weights)
 
+    # create copy of distance metrics
+    dist_memory = copy.deepcopy(dist_memory)
+
     _, n_feats = user_profiles.shape
 
     # get the user_id of friends of the target user
@@ -212,6 +215,7 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
 
 
 def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
+                            dist_memory=None,
                             is_directed=False,
                             pval_threshold=0.5,
                             mutate_rate=0.4,
@@ -266,10 +270,13 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
     min_friend_cnt is not implemented
     """
     pvals = []
+    if dist_memory is None:
+        dist_memory = {}
 
     for uid in user_ids:
-        sim_dist, diff_dist = user_grouped_dist(uid, weights,
+        sim_dist, diff_dist, dist_memory = user_grouped_dist(uid, weights,
                                                 user_ids, user_profiles, user_connections,
+                                                dist_memory,
                                                 is_directed)
         pval = user_dist_kstest(sim_dist, diff_dist, fit_rayleigh, _n)
         pvals.append(pval)
@@ -288,7 +295,7 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
         id_retain = good_fits
         id_mutate = bad_fits
 
-    return id_retain, id_mutate
+    return id_retain, id_mutate, copy.deepcopy(dist_memory)
 
 
 def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, retain_type=1):
@@ -326,7 +333,9 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
 
 
 def find_fit_group(uid, dist_metrics,
-                   user_ids, user_profiles, user_connections, is_directed=False,
+                   user_ids, user_profiles, user_connections,
+                   dist_memorys,
+                   is_directed=False,
                    threshold=0.5, current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
         each group
@@ -351,25 +360,32 @@ def find_fit_group(uid, dist_metrics,
     res: {list}, [group_idx, pvalue]
     """
     if current_group is None:
-        other_group = list(dist_metrics.keys())
-        other_dist_metrics = list(dist_metrics.values())
+        other_groups = list(dist_metrics.keys())
+        # other_dist_metrics = list(dist_metrics.values())
     else:
-        other_group = [group for group in dist_metrics.keys() if group != current_group]
-        other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
+        other_groups = [group for group in dist_metrics.keys() if group != current_group]
+        # other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
 
-    if len(other_dist_metrics) > 0:
+    if len(other_groups) > 0:
         # only excute this is at least one alternative group
         pvals = []
 
-        for dist in other_dist_metrics:
+        for ii, group in enumerate(other_groups):
+            dist_weights = dist_metrics[group]
+            dist_memory = dist_memorys[group]
             # loop through all distance metrics and calculate
             # p-value of ks-tests by applying it to the user
             # relationships
-            sim_dist, diff_dist = user_grouped_dist(user_id=uid, weights=dist,
-                                                    user_ids=user_ids, user_profiles=user_profiles,
-                                                    user_connections=user_connections,
-                                                    is_directed=is_directed)
-
+            sim_dist, diff_dist, dist_memory = user_grouped_dist(user_id=uid,
+                                                                 weights=dist_weights,
+                                                                 user_ids=user_ids,
+                                                                 user_profiles=user_profiles,
+                                                                 user_connections=user_connections,
+                                                                 dist_memory=dist_memory,
+                                                                 is_directed=is_directed)
+            # update the group's distance metrics
+            dist_memorys[group] = dist_memory
+            # append pval
             pval = user_dist_kstest(sim_dist_vec=sim_dist, diff_dist_vec=diff_dist,
                                     fit_rayleigh=fit_rayleigh, _n=_n)
 
@@ -379,7 +395,7 @@ def find_fit_group(uid, dist_metrics,
         # connections at the best degree.
         max_pval = max(pvals)
         max_idx = [ii for ii, pval in enumerate(pvals) if pval == max_pval][0]
-        best_group = other_group[max_idx]
+        best_group = other_groups[max_idx]
 
         if max_pval < threshold:
             # reject null hypothesis
