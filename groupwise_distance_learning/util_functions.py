@@ -120,7 +120,7 @@ def user_grouped_dist(user_id, weights,
     gd_wrapper.load_weights(weights)
 
     # create copy of distance metrics
-    dist_memory = copy.deepcopy(dist_memory)
+    # dist_memory = copy.deepcopy(dist_memory)
 
     _, n_feats = user_profiles.shape
 
@@ -128,7 +128,7 @@ def user_grouped_dist(user_id, weights,
     friend_ls = get_user_friends(user_id, user_connections, is_directed)
     non_friends_ls = [u for u in user_ids if u not in friend_ls + [user_id]]
 
-    # retrive target user's profile
+    # retrieve target user's profile
     u_idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
     user_profile = user_profiles[u_idx, :]
     user_profile = normalize_user_record(user_profile, n_feats)
@@ -161,7 +161,7 @@ def user_grouped_dist(user_id, weights,
         # collect distance with friends
         diff_dist_vec.append(the_dist)
 
-    return sim_dist_vec, diff_dist_vec, copy.deepcopy(dist_memory)
+    return sim_dist_vec, diff_dist_vec
 
 
 def user_dist_kstest(sim_dist_vec, diff_dist_vec,
@@ -215,7 +215,7 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
 
 
 def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
-                            dist_memory=None,
+                            dist_memory,
                             is_directed=False,
                             pval_threshold=0.5,
                             mutate_rate=0.4,
@@ -270,11 +270,9 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
     min_friend_cnt is not implemented
     """
     pvals = []
-    if dist_memory is None:
-        dist_memory = {}
 
     for uid in user_ids:
-        sim_dist, diff_dist, dist_memory = user_grouped_dist(uid, weights,
+        sim_dist, diff_dist = user_grouped_dist(uid, weights,
                                                 user_ids, user_profiles, user_connections,
                                                 dist_memory,
                                                 is_directed)
@@ -295,7 +293,7 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
         id_retain = good_fits
         id_mutate = bad_fits
 
-    return id_retain, id_mutate, copy.deepcopy(dist_memory)
+    return id_retain, id_mutate
 
 
 def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, retain_type=1):
@@ -334,7 +332,7 @@ def ldm_train_with_list(users_list, user_ids, user_profiles, user_connections, r
 
 def find_fit_group(uid, dist_metrics,
                    user_ids, user_profiles, user_connections,
-                   dist_memorys,
+                   dist_memory_container,
                    is_directed=False,
                    threshold=0.5, current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
@@ -372,19 +370,20 @@ def find_fit_group(uid, dist_metrics,
 
         for ii, group in enumerate(other_groups):
             dist_weights = dist_metrics[group]
-            dist_memory = dist_memorys[group]
+            dist_memory = dist_memory_container[group]
             # loop through all distance metrics and calculate
             # p-value of ks-tests by applying it to the user
             # relationships
-            sim_dist, diff_dist, dist_memory = user_grouped_dist(user_id=uid,
-                                                                 weights=dist_weights,
-                                                                 user_ids=user_ids,
-                                                                 user_profiles=user_profiles,
-                                                                 user_connections=user_connections,
-                                                                 dist_memory=dist_memory,
-                                                                 is_directed=is_directed)
+            sim_dist, diff_dist = user_grouped_dist(user_id=uid,
+                                                    weights=dist_weights,
+                                                    user_ids=user_ids, user_profiles=user_profiles,
+                                                    user_connections=user_connections,
+                                                    dist_memory=dist_memory,
+                                                    is_directed=is_directed)
             # update the group's distance metrics
-            dist_memorys[group] = dist_memory
+            # dictionary is immutable, no need to re-assign
+            # to the parent variable to acquire update value
+            # dist_memory_container[group] = dist_memory
             # append pval
             pval = user_dist_kstest(sim_dist_vec=sim_dist, diff_dist_vec=diff_dist,
                                     fit_rayleigh=fit_rayleigh, _n=_n)
