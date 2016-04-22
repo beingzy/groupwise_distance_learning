@@ -28,6 +28,14 @@ def _init_dict_list(k):
     return res_dict
 
 
+def _init_list_dict(k):
+    """return a list of dictionary"""
+    res_list = []
+    for ii in range(k):
+        res_list.append({})
+    return res_list
+
+
 def _convert_array_to_list(x):
     """ convert data stucture's memeber to from np.array to list"""
     if isinstance(x, dict):
@@ -274,6 +282,7 @@ def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
 def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
                                         user_ids, user_profiles, user_connections,
                                         ks_alpha=0.05, min_group_size=5, verbose=False,
+                                        is_directed=False,
                                         random_state=None):
     """ a single run of groupwise distance learning
 
@@ -329,7 +338,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     # add container store pairwise distance
     # which will be reset to empty {} when
     # distance metrics update
-    dist_memory_container = _init_dict_list(len(dist_metrics)) # how to deal buffer group
+    dist_memory_container = _init_list_dict(len(dist_metrics)) # how to deal buffer group
 
     start_time = datetime.now()
     # step 00: learn distance metriccs
@@ -346,7 +355,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     start_time = datetime.now()
     fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
                                                                               user_ids, user_profiles, user_connections,
-                                                                              dist_memorys,
+                                                                              dist_memory_container, is_directed,
                                                                               ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -358,7 +367,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     start_time = datetime.now()
     fit_group, fit_pvals, buffer_group = _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
                                                               user_ids, user_profiles, user_connections,
-                                                              dist_memorys,
+                                                              dist_memory_container, is_directed,
                                                               ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -371,7 +380,8 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
                                                                                    unfit_group, buffer_group,
                                                                                    user_ids, user_profiles,
                                                                                    user_connections,
-                                                                                   dist_memorys,
+                                                                                   dist_memory_container,
+                                                                                   is_directed,
                                                                                    ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -443,8 +453,8 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     buffer_group = []
 
     # general distance
-    gd_wrapper = GeneralDistanceWrapper()
-    gd_wrapper.fit(user_profiles)
+    # gd_wrapper = GeneralDistanceWrapper()
+    # gd_wrapper.fit(user_profiles)
 
     # initiating the group's composition
     total_users = len(user_ids)
