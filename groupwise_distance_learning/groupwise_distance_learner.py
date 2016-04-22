@@ -95,6 +95,8 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
 def _update_fit_group_with_groupwise_dist(dist_matrics,
                                           fit_group, fit_pvals,
                                           user_ids, user_profiles, user_connections,
+                                          dist_memory_container,
+                                          is_directed=False,
                                           ks_alpha=0.05):
     """ return fit_group, fit_pvals, unfit_group by updating members in fit_group
     with distance metrics unfit member will be sent to unfit group.
@@ -131,14 +133,16 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
 
     for gg, gg_user_ids in fit_group_copy.items():
         gg_dist = dist_matrics[gg]
+        dist_memory = dist_memory_container[gg]
 
         for ii, ii_user_id in enumerate(gg_user_ids):
             sim_dist, diff_dist = user_grouped_dist(ii_user_id, gg_dist,
-                                                    user_ids, user_profiles, user_connections)
+                                                    user_ids, user_profiles, user_connections,
+                                                    dist_memory, is_directed)
             ii_pval = user_dist_kstest(sim_dist, diff_dist)
 
             if ii_pval < ks_alpha:
-                # remove the user from fit group, retreive [0] to ensure slice is integer
+                # remove the user from fit group, retrieve [0] to ensure slice is integer
                 idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id][0]
                 # fit_group[gg].remove(idx)
                 del fit_group[gg][idx]
@@ -158,14 +162,12 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
 
 
 def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
-                         user_ids, user_profiles, user_connections, ks_alpha=0.05):
+                         user_ids, user_profiles, user_connections,
+                         dist_memory_container, is_directed=False,
+                         ks_alpha=0.05):
     """ return fit_group, fit_pvals, buffer_group
         redistribute member in buffer group into fit_group if fit had been found
     """
-    # to keep API consistant
-    # restore user_profiles to DataFrame including
-    # user_graph = Graph()
-    # user_graph.add_edges_from(user_connections)
 
     buffer_group_copy = buffer_group.copy()
     if len(buffer_group_copy) > 0:
@@ -173,6 +175,8 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
             ii_new_group, ii_new_pval = find_fit_group(ii_user_id, dist_metrics,
                                                        user_ids, user_profiles,
                                                        user_connections,
+                                                       dist_memory_container,
+                                                       is_directed,
                                                        ks_alpha,
                                                        current_group=None,
                                                        fit_rayleigh=False)
@@ -190,7 +194,8 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
 
 
 def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals, unfit_group, buffer_group,
-                                              user_ids, user_profiles, user_connections, ks_alpha=0.05):
+                                              user_ids, user_profiles, user_connections,
+                                              dist_memory_container, is_directed=False, ks_alpha=0.05):
     """ update members in unfit_group with cross-group distance. unfit members are kept in buffer_group
     """
     # to keep API consistant
@@ -204,10 +209,14 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
         # tests with distance metrics associated with user's group
         other_group_keys = [group_key for group_key in dist_metrics.keys() if not group_key == gg]
         cross_group_dist_metrics = {key: dist_metrics[key] for key in other_group_keys}
+        cross_dist_memory_container = {key: dist_memory_container[key] for key in other_group_keys}
 
         for ii, ii_user_id in enumerate(gg_user_ids):
             ii_new_group, ii_new_pval = find_fit_group(ii_user_id, cross_group_dist_metrics,
-                                                       user_ids, user_profiles, user_connections, ks_alpha,
+                                                       user_ids, user_profiles, user_connections,
+                                                       cross_dist_memory_container,
+                                                       is_directed,
+                                                       ks_alpha,
                                                        current_group=None, fit_rayleigh=False)
             # redistribute the user based on fit-tests
             if not ii_new_group is None:
@@ -317,9 +326,15 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     # validate the input data is compatible
     _validate_input_learned_info(dist_metrics, fit_group, fit_pvals)
 
+    # add container store pairwise distance
+    # which will be reset to empty {} when
+    # distance metrics update
+    dist_memory_container = _init_dict_list(len(dist_metrics)) # how to deal buffer group
+
     start_time = datetime.now()
     # step 00: learn distance metriccs
-    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
+    dist_metrics = _update_groupwise_dist(dist_metrics, fit_group,
+                                          user_ids, user_profiles, user_connections,
                                           min_group_size)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -331,6 +346,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     start_time = datetime.now()
     fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
                                                                               user_ids, user_profiles, user_connections,
+                                                                              dist_memorys,
                                                                               ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
@@ -341,7 +357,9 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     # fit with other distance metrics
     start_time = datetime.now()
     fit_group, fit_pvals, buffer_group = _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
-                                                              user_ids, user_profiles, user_connections, ks_alpha)
+                                                              user_ids, user_profiles, user_connections,
+                                                              dist_memorys,
+                                                              ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -352,7 +370,9 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     fit_group, fit_pvals, buffer_group = _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals,
                                                                                    unfit_group, buffer_group,
                                                                                    user_ids, user_profiles,
-                                                                                   user_connections, ks_alpha)
+                                                                                   user_connections,
+                                                                                   dist_memorys,
+                                                                                   ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -422,10 +442,6 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
     fit_pvals = _init_dict_list(n_group)
     buffer_group = []
 
-    # add container store pairwise distance
-    # which will be reset to empty {} when
-    # distance metrics update
-    group_dist_memory = _init_dict_list(n_group)
     # general distance
     gd_wrapper = GeneralDistanceWrapper()
     gd_wrapper.fit(user_profiles)

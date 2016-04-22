@@ -41,7 +41,6 @@ def zipf(n, s=1):
 def normalize_user_record(a_profile_record, n_feat=None):
     """ convert an array of single row to list """
     if isinstance(a_profile_record, np.ndarray):
-
         if n_feat is None:
             _, n_feat = a_profile_record.shape
 
