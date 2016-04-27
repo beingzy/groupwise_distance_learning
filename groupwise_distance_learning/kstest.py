@@ -17,7 +17,8 @@ import numpy as np
 robjects.conversion.py2ri = numpy2ri
 rstats = importr("stats")
 
-def kstest_2samp_greater(x, y, auto_ajust=False):
+
+def kstest_2samp_greater(x, y, auto_ajust=True):
     """ return tests staticics and p-value for KS-tests
     which compare two samples.
     IF either x or y has too few elements, the test will
@@ -50,7 +51,8 @@ def kstest_2samp_greater(x, y, auto_ajust=False):
     try:
         x_size = len(x)
         if (len(y) > 3 * x_size) and auto_ajust:
-            y = choice(y, size=3 * x_size, replace=False)
+            sample_size = 3 * x_size
+            y = choice(y, size=sample_size, replace=True)
 
         setting = array(["less"], dtype="str")
         test_res = rstats.ks_test(x, y, alternative=setting)
