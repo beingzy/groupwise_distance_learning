@@ -333,7 +333,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     total_time = 0
 
     # validate the input data is compatible
-    _validate_input_learned_info(dist_metrics, fit_group, fit_pvals)
+    # _validate_input_learned_info(dist_metrics, fit_group, fit_pvals)
 
     # add container store pairwise distance
     # which will be reset to empty {} when
@@ -436,7 +436,7 @@ def groupwise_dist_learning(user_ids, user_profiles, user_connections,
 
     """
 
-    _validate_user_information(user_ids, user_profiles, user_connections)
+    # _validate_user_information(user_ids, user_profiles, user_connections)
 
     if max_iter < 0:
         msg = "Invalid number of initilizations n_group (={}) must be bigger than zero.".format(max_iter)
