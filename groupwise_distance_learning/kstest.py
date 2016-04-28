@@ -58,7 +58,7 @@ def kstest_2samp_greater(x, y, auto_ajust=False):
         test_res = rstats.ks_test(x, y, alternative=setting)
         ts, pval = test_res[0][0], test_res[1][0]
     except:
-        ts, pval = None, 1
+        ts, pval = None, 0
 
     return ts, pval
 
