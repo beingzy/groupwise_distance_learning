@@ -216,7 +216,7 @@ def user_dist_kstest(sim_dist_vec, diff_dist_vec,
 def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
                             dist_memory,
                             is_directed=False,
-                            pval_threshold=0.5,
+                            ks_alpha=0.5,
                             mutate_rate=0.4,
                             fit_rayleigh=False,
                             _n=1000):
@@ -237,7 +237,7 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
     is_directed: {boolean, default=False}
         False: consider user_connections as undirected graph
         True: as directed graph
-    pval_threshold: {float}, the threshold for p-value to reject hypothesis
+    ks_alpha: {float}, the threshold for p-value to reject hypothesis
     min_friend_cnt: {integer}, drop users whose total of friends is less than
        this minimum count
     mutate_rate: {float}, a float value [0 - 1] determine the percentage of
@@ -261,7 +261,7 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
     weights = ldm().fit(df, friends_list).get_transform_matrix()
     profile_df = users_df[["ID"] + cols]
     grouped_users = users_filter_by_weights(weights,
-                       profile_df, friends_df, pval_threshold = 0.10,
+                       profile_df, friends_df, ks_alpha = 0.10,
                        min_friend_cnt = 10)
 
     Notes:
@@ -280,8 +280,8 @@ def users_filter_by_weights(weights, user_ids, user_profiles, user_connections,
 
     sorted_id_pval = sorted(zip(user_ids, pvals), key=lambda x: x[1])
 
-    good_fits = [i for i, p in sorted_id_pval if p >= pval_threshold]
-    bad_fits = [i for i, p in sorted_id_pval if p < pval_threshold]
+    good_fits = [i for i, p in sorted_id_pval if p >= ks_alpha]
+    bad_fits = [i for i, p in sorted_id_pval if p < ks_alpha]
 
     if len(bad_fits) > 0:
         mutate_size = np.ceil(len(bad_fits) * mutate_rate)
@@ -333,7 +333,7 @@ def find_fit_group(uid, dist_metrics,
                    user_ids, user_profiles, user_connections,
                    dist_memory_container,
                    is_directed=False,
-                   threshold=0.5, current_group=None, fit_rayleigh=False, _n=1000):
+                   ks_alpha=0.5, current_group=None, fit_rayleigh=False, _n=1000):
     """ calculate user p-value for the distance metrics of
         each group
 
@@ -348,7 +348,7 @@ def find_fit_group(uid, dist_metrics,
     is_directed: {boolean, default=False}
         False: consider user_connections as undirected graph
         True: as directed graph
-    threshold: {float}, threshold for qualifying pvalue of ks-tests
+    ks_alpha: {float}, threshold for qualifying pvalue of ks-tests
     current_group: {integer}, group index
     fit_rayleigh: {boolean}
 
@@ -395,7 +395,7 @@ def find_fit_group(uid, dist_metrics,
         max_idx = [ii for ii, pval in enumerate(pvals) if pval == max_pval][0]
         best_group = other_groups[max_idx]
 
-        if max_pval < threshold:
+        if max_pval < ks_alpha:
             # reject null hypothesis
             best_group = None
             max_pval = None
