@@ -386,7 +386,6 @@ def find_fit_group(uid, dist_metrics,
             # append pval
             pval = user_dist_kstest(sim_dist_vec=sim_dist, diff_dist_vec=diff_dist,
                                     fit_rayleigh=fit_rayleigh, _n=_n)
-
             pvals.append(pval)
 
         # find group whose distance metrics explained a user's existing

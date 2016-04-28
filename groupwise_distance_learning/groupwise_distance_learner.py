@@ -79,7 +79,7 @@ def _validate_user_information(user_ids, user_profiles, user_connections):
 
 
 def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, user_connections,
-                           min_group_size=5, random_state=None):
+                           min_group_size=5):
     """ learning gruopwise distnace metrics """
     n_feat = user_profiles.shape[1]
     # create data container
@@ -280,8 +280,7 @@ def _validate_input_learned_info(dist_metrics, fit_group, fit_pvals):
 def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buffer_group,
                                         user_ids, user_profiles, user_connections,
                                         ks_alpha=0.05, min_group_size=5, verbose=False,
-                                        is_directed=False,
-                                        random_state=None):
+                                        is_directed=False):
     """ a single run of groupwise distance learning
 
     Parameters:
