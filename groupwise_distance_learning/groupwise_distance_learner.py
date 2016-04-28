@@ -5,12 +5,10 @@ Date: 2016/MM/DD
 import numpy as np
 from numpy.random import choice
 from pandas import DataFrame
-from networkx import Graph
 from math import floor
 from datetime import datetime
 from copy import deepcopy
 
-from distance_metrics.GeneralDistanceWrapper import GeneralDistanceWrapper
 from groupwise_distance_learning.util_functions import user_grouped_dist
 from groupwise_distance_learning.util_functions import user_dist_kstest
 from groupwise_distance_learning.util_functions import ldm_train_with_list
@@ -105,7 +103,7 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
                                           user_ids, user_profiles, user_connections,
                                           dist_memory_container,
                                           is_directed=False,
-                                          ks_alpha=0.05):
+                                          ks_alpha=0.90):
     """ return fit_group, fit_pvals, unfit_group by updating members in fit_group
     with distance metrics unfit member will be sent to unfit group.
     (fit_group, fit_pvals, unfit_group)
@@ -172,7 +170,7 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
 def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
                          user_ids, user_profiles, user_connections,
                          dist_memory_container, is_directed=False,
-                         ks_alpha=0.05):
+                         ks_alpha=0.90):
     """ return fit_group, fit_pvals, buffer_group
         redistribute member in buffer group into fit_group if fit had been found
     """
@@ -185,7 +183,7 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
                                                        user_connections,
                                                        dist_memory_container,
                                                        is_directed,
-                                                       ks_alpha,
+                                                       ks_alpha=ks_alpha,
                                                        current_group=None,
                                                        fit_rayleigh=False)
             if not ii_new_group is None:
@@ -203,7 +201,7 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
 
 def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals, unfit_group, buffer_group,
                                               user_ids, user_profiles, user_connections,
-                                              dist_memory_container, is_directed=False, ks_alpha=0.05):
+                                              dist_memory_container, is_directed=False, ks_alpha=0.90):
     """ update members in unfit_group with cross-group distance. unfit members are kept in buffer_group
     """
     # to keep API consistant
@@ -224,7 +222,7 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
                                                        user_ids, user_profiles, user_connections,
                                                        cross_dist_memory_container,
                                                        is_directed,
-                                                       ks_alpha,
+                                                       ks_alpha=ks_alpha,
                                                        current_group=None, fit_rayleigh=False)
             # redistribute the user based on fit-tests
             if not ii_new_group is None:
@@ -356,7 +354,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     fit_group, fit_pvals, unfit_group = _update_fit_group_with_groupwise_dist(dist_metrics, fit_group, fit_pvals,
                                                                               user_ids, user_profiles, user_connections,
                                                                               dist_memory_container, is_directed,
-                                                                              ks_alpha)
+                                                                              ks_alpha=ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -368,7 +366,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     fit_group, fit_pvals, buffer_group = _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
                                                               user_ids, user_profiles, user_connections,
                                                               dist_memory_container, is_directed,
-                                                              ks_alpha)
+                                                              ks_alpha=ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -382,7 +380,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
                                                                                    user_connections,
                                                                                    dist_memory_container,
                                                                                    is_directed,
-                                                                                   ks_alpha)
+                                                                                   ks_alpha=ks_alpha)
     if verbose:
         duration = (datetime.now() - start_time).total_seconds()
         total_time += duration
@@ -394,7 +392,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
 def groupwise_dist_learning(user_ids, user_profiles, user_connections,
                             n_group=2, max_iter=200, max_nogain_streak=10,
                             min_group_size=5, ks_alpha=0.95,
-                            alpha_update_freq=5, learning_rate = 0.1,
+                            alpha_update_freq=5, learning_rate=0.1,
                             init="zipf", C=0.1,
                             verbose=False, is_debug=False, random_state=None):
     """ groupwise distance learning algorithm to classify users.
@@ -634,9 +632,7 @@ class GroupwiseDistLearner(object):
         self._score = None
         self._debug_info = None
 
-
     def fit(self, user_ids, user_profiles, user_connections):
-
         res = groupwise_dist_learning(user_ids, user_profiles, user_connections,
                                       n_group=self._n_group, max_iter=self._max_iter,
                                       max_nogain_streak=self._max_nogain_streak,
