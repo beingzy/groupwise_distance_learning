@@ -46,9 +46,14 @@ def kstest_2samp_greater(x, y, auto_ajust=False):
     # print(msg)
 
     if isinstance(x, np.ndarray):
-        x = x.ravel().tolist()
+        x = x.ravel()
+    else:
+        x = np.array(x)
+
     if isinstance(y, np.ndarray):
         y = y.ravel().tolist()
+    else:
+        y = np.array(y)
 
     try:
         x_size = len(x)
