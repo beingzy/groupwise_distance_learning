@@ -128,13 +128,13 @@ def user_grouped_dist(user_id, weights,
     non_friends_ls = [u for u in user_ids if u not in friend_ls + [user_id]]
 
     # retrieve target user's profile
-    u_idx = [i for i, uid in enumerate(user_ids) if uid == user_id]
+    u_idx = [i for i, uid in enumerate(user_ids) if uid == user_id][0]
     user_profile = user_profiles[u_idx, :]
     user_profile = normalize_user_record(user_profile, n_feats)
 
     sim_dist_vec = []
     for f_id in friend_ls:
-        f_idx = [i for i, uid in enumerate(user_ids) if uid == f_id]
+        f_idx = [i for i, uid in enumerate(user_ids) if uid == f_id][0]
         pair_sign = gen_users_pair_signature(u_idx, f_idx, is_directed)
         if pair_sign in dist_memory:
             the_dist = dist_memory[pair_sign]
@@ -148,7 +148,7 @@ def user_grouped_dist(user_id, weights,
 
     diff_dist_vec = []
     for nf_id in non_friends_ls:
-        nf_idx = [i for i, uid in enumerate(user_ids) if uid == nf_id]
+        nf_idx = [i for i, uid in enumerate(user_ids) if uid == nf_id][0]
         pair_sign = gen_users_pair_signature(u_idx, nf_idx, is_directed)
         if pair_sign in dist_memory:
             the_dist = dist_memory[pair_sign]
@@ -358,17 +358,17 @@ def find_fit_group(uid, dist_metrics,
     """
     if current_group is None:
         other_groups = list(dist_metrics.keys())
-        # other_dist_metrics = list(dist_metrics.values())
+        other_dist_metrics = list(dist_metrics.values())
     else:
         other_groups = [group for group in dist_metrics.keys() if group != current_group]
-        # other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
+        other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
 
     if len(other_groups) > 0:
         # only excute this is at least one alternative group
         pvals = []
 
         for ii, group in enumerate(other_groups):
-            dist_weights = dist_metrics[group]
+            dist_weights = other_dist_metrics[group]
             dist_memory = dist_memory_container[group]
             # loop through all distance metrics and calculate
             # p-value of ks-tests by applying it to the user

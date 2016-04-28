@@ -338,7 +338,7 @@ def _groupwise_dist_learning_single_run(dist_metrics, fit_group, fit_pvals, buff
     dist_memory_container = _init_list_dict(len(dist_metrics)) # how to deal buffer group
 
     start_time = datetime.now()
-    # step 00: learn distance metriccs
+    # step 00: learn distance metrics
     dist_metrics = _update_groupwise_dist(dist_metrics, fit_group,
                                           user_ids, user_profiles, user_connections,
                                           min_group_size)
