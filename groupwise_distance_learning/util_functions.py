@@ -2,23 +2,15 @@
 Author: Yi Zhang <beingzy@gmail.com>
 Date: 2016/02/29
 """
-import os
-import sys
-import glob
 import numpy as np
-import scipy as sp
-import pandas as pd
-import networkx as nx
-from matplotlib import pyplot as plt
-import copy
-
+from copy import deepcopy
 from scipy.stats import rayleigh
-
 
 from learning_dist_metrics.ldm import LDM
 from learning_dist_metrics.dist_metrics import weighted_euclidean
 from groupwise_distance_learning.kstest import kstest_2samp_greater
 from distance_metrics.GeneralDistanceWrapper import GeneralDistanceWrapper
+
 
 def zipf_pdf(k, n, s=1):
     """ return the probability of nth rank
@@ -48,7 +40,6 @@ def normalize_user_record(a_profile_record, n_feat=None):
         if len(row_list) < n_feat:
             row_list = row_list[0]
         return row_list
-
     else:
         return a_profile_record
 
@@ -356,12 +347,14 @@ def find_fit_group(uid, dist_metrics,
     --------
     res: {list}, [group_idx, pvalue]
     """
+    dist_metrics = deepcopy(dist_metrics)
+
     if current_group is None:
         other_groups = list(dist_metrics.keys())
         other_dist_metrics = list(dist_metrics.values())
     else:
         other_groups = [group for group in dist_metrics.keys() if group != current_group]
-        other_dist_metrics = [dist for group, dist in dist_metrics.items() if group != current_group]
+        other_dist_metrics = {group:dist for group, dist in dist_metrics.items() if group != current_group}
 
     if len(other_groups) > 0:
         # only excute this is at least one alternative group

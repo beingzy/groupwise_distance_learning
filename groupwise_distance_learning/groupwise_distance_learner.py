@@ -37,13 +37,19 @@ def _init_list_dict(k):
 def _convert_array_to_list(x):
     """ convert data stucture's memeber to from np.array to list"""
     if isinstance(x, dict):
+        res = {}
         for key in x.keys():
-            item = x[key]
-            if isinstance(item, np.ndarray):
-                x[key] = item.tolist()
-    if isinstance(x, np.ndarray):
-        x = x.tolist()
-    return x
+            items = x[key].copy()
+            if isinstance(items, np.ndarray):
+                res[key] = items.tolist()
+            else:
+                res[key] = items
+        return res
+
+    elif isinstance(x, np.ndarray):
+        return x.tolist()
+    else:
+        return x.copy()
 
 
 def all_to_list(func):
@@ -83,7 +89,7 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
     """ learning gruopwise distnace metrics """
     n_feat = user_profiles.shape[1]
     # create data container
-    new_dist_metrics = dist_metrics.copy()
+    new_dist_metrics = deepcopy(dist_metrics)
 
     for gg, gg_user_ids in fit_group.items():
         # ldm() optimized distance metrics - weights
@@ -98,7 +104,7 @@ def _update_groupwise_dist(dist_metrics, fit_group, user_ids, user_profiles, use
     return new_dist_metrics
 
 
-def _update_fit_group_with_groupwise_dist(dist_matrics,
+def _update_fit_group_with_groupwise_dist(dist_metrics,
                                           fit_group, fit_pvals,
                                           user_ids, user_profiles, user_connections,
                                           dist_memory_container,
@@ -127,18 +133,17 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
     fit_group, fit_pvals, unfit_group
     """
 
-    fit_group = _convert_array_to_list(fit_group)
-    fit_pvals = _convert_array_to_list(fit_pvals)
-
-    # user_graph = Graph()
-    # user_graph.add_edges_from(user_connections)
+    #fit_group = _convert_array_to_list(fit_group)
+    #fit_pvals = _convert_array_to_list(fit_pvals)
+    fit_group = deepcopy(fit_group)
+    fit_pvals = deepcopy(fit_pvals)
 
     # create container
-    fit_group_copy = fit_group.copy()
+    fit_group_copy = deepcopy(fit_group)
     unfit_group = {}
 
     for gg, gg_user_ids in fit_group_copy.items():
-        gg_dist = dist_matrics[gg]
+        gg_dist = dist_metrics[gg]
         dist_memory = dist_memory_container[gg]
 
         for ii, ii_user_id in enumerate(gg_user_ids):
@@ -150,13 +155,21 @@ def _update_fit_group_with_groupwise_dist(dist_matrics,
             if ii_pval < ks_alpha:
                 # remove the user from fit group, retrieve [0] to ensure slice is integer
                 idx = [idx for idx, uid in enumerate(fit_group[gg]) if uid == ii_user_id][0]
-                # fit_group[gg].remove(idx)
-                del fit_group[gg][idx]
-                # fit_pvals[gg].remove(idx)
-                del fit_pvals[gg][idx]
+                if isinstance(fit_group[gg], np.ndarray):
+                    fit_group[gg] = np.delete(fit_group[gg], idx)
+                else:
+                    del fit_group[gg][idx]
+
+                if isinstance(fit_pvals, np.ndarray):
+                    fit_pvals[gg] = np.delete(fit_pvals[gg], idx)
+                else:
+                    del fit_pvals[gg][idx]
                 # add the user into unfit group
                 if gg in unfit_group:
-                    unfit_group[gg].append(ii_user_id)
+                    if isinstance(unfit_group[gg], np.ndarray):
+                        unfit_group[gg] = np.append(unfit_group[gg], ii_user_id)
+                    else:
+                        unfit_group[gg].append(ii_user_id)
                 else:
                     unfit_group[gg] = [ii_user_id]
             else:
@@ -174,7 +187,9 @@ def _update_buffer_group(dist_metrics, fit_group, fit_pvals, buffer_group,
     """ return fit_group, fit_pvals, buffer_group
         redistribute member in buffer group into fit_group if fit had been found
     """
-
+    fit_group = deepcopy(fit_group)
+    fit_pvals = deepcopy(fit_pvals)
+    buffer_group = buffer_group.copy()
     buffer_group_copy = buffer_group.copy()
     if len(buffer_group_copy) > 0:
         for ii, ii_user_id in enumerate(buffer_group_copy):
@@ -209,7 +224,12 @@ def _update_unfit_groups_with_crossgroup_dist(dist_metrics, fit_group, fit_pvals
     # user_graph = Graph()
     # user_graph.add_edges_from(user_connections)
 
+    fit_group = deepcopy(fit_group)
+    fit_pvals = deepcopy(fit_pvals)
+    unfit_group = deepcopy(unfit_group)
+    buffer_group = deepcopy(buffer_group)
     unfit_group_copy = unfit_group.copy()
+
     for gg, gg_user_ids in unfit_group_copy.items():
         # extract cross-group distance metrics dictionary to avoid duplicate
         # tests with distance metrics associated with user's group
